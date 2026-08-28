@@ -1,9 +1,10 @@
-import Link from "next/link";
+import Link from "next/link"
 
 export default function Home() {
   return (
     <>
       <Hero />
+      <PartnerPassesSection />
       <Marquee />
       <About />
       <Highlights />
@@ -12,7 +13,7 @@ export default function Home() {
       <Venue />
       <CtaBanner />
     </>
-  );
+  )
 }
 
 /* ---------------- HERO ---------------- */
@@ -46,18 +47,19 @@ function Hero() {
               beverage brands under one roof.
             </p>
 
-            <div className="mt-9 flex flex-wrap gap-3">
+            {/* Visitor CTA Prioritized */}
+            <div className="mt-9 flex flex-wrap items-center gap-4">
               <Link
-                href="/tickets"
-                className="border border-marigold bg-marigold px-7 py-3 text-sm font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-marigold"
+                href="/register/visitor"
+                className="border border-marigold bg-marigold px-8 py-3.5 text-sm font-bold uppercase tracking-wider text-grape-950 transition-all hover:bg-transparent hover:text-marigold"
               >
-                Get Tickets
+                Register as Visitor →
               </Link>
               <Link
-                href="#about"
-                className="border border-white/25 px-7 py-3 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:border-white"
+                href="#partner-passes"
+                className="border border-white/25 px-6 py-3.5 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:border-white hover:bg-white/5"
               >
-                Explore
+                Exhibitor &amp; Sponsor Passes
               </Link>
             </div>
           </div>
@@ -66,12 +68,12 @@ function Hero() {
           <div className="flex flex-col md:col-span-4">
             <Fact label="Dates" value="19–20" sub="September 2026" accent="text-basil" />
             <Fact label="Venue" value="SMX" sub="Clark, Pampanga" accent="text-tangerine" border />
-            <Fact label="Brands" value="50+" sub="Exhibiting" accent="text-marigold" border />
+            <Fact label="Pass Types" value="3" sub="Visitor · Exhibitor · Sponsor" accent="text-marigold" border />
           </div>
         </div>
       </div>
     </section>
-  );
+  )
 }
 
 function Fact({
@@ -81,11 +83,11 @@ function Fact({
   accent,
   border,
 }: {
-  label: string;
-  value: string;
-  sub: string;
-  accent: string;
-  border?: boolean;
+  label: string
+  value: string
+  sub: string
+  accent: string
+  border?: boolean
 }) {
   return (
     <div className={`flex-1 px-6 py-8 ${border ? "border-t border-white/12" : ""}`}>
@@ -95,7 +97,100 @@ function Fact({
       </div>
       <div className="mt-1 text-sm text-white/55">{sub}</div>
     </div>
-  );
+  )
+}
+
+/* ---------------- EXHIBITOR & SPONSOR SECTION ---------------- */
+function PartnerPassesSection() {
+  return (
+    <section id="partner-passes" className="border-b border-white/12 bg-grape-950">
+      <div className="mx-auto max-w-6xl border-x border-white/12 px-6 py-16">
+        <div className="flex flex-wrap items-end justify-between gap-6 border-b border-white/12 pb-6">
+          <div>
+            <div className="eyebrow text-marigold">Partner Opportunities</div>
+            <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Join as an Exhibitor or Sponsor
+            </h2>
+          </div>
+          <p className="max-w-md text-sm text-white/60">
+            Showcase your culinary brand or partner with Central Luzon&apos;s fastest-growing food &amp; beverage expo.
+          </p>
+        </div>
+
+        <div className="mt-10 grid gap-6 md:grid-cols-2">
+          {/* Exhibitor Card */}
+          <div className="flex flex-col justify-between border border-white/12 bg-grape-900/60 p-8 transition-all hover:border-basil/50">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="eyebrow text-basil">Exhibitor Registration</span>
+                <span className="border border-basil/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-basil">
+                  Booths Available
+                </span>
+              </div>
+              <h3 className="mt-4 font-display text-2xl font-bold">Exhibit Your Brand</h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/70">
+                Put your products directly in front of 10,000+ hungry foodies, restaurateurs, distributors, and buyers.
+              </p>
+              <ul className="mt-6 space-y-2 text-sm text-white/60">
+                <li className="flex items-center gap-2">
+                  <span className="text-basil">✓</span> Prime floor booth placement
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-basil">✓</span> Official OPFBEX directory listing
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-basil">✓</span> Exhibitor pass badges for staff
+                </li>
+              </ul>
+            </div>
+            <div className="mt-8">
+              <Link
+                href="/register/exhibitor"
+                className="inline-block w-full border border-basil bg-basil py-3 text-center text-sm font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-basil"
+              >
+                Register as Exhibitor →
+              </Link>
+            </div>
+          </div>
+
+          {/* Sponsor Card */}
+          <div className="flex flex-col justify-between border border-white/12 bg-grape-900/60 p-8 transition-all hover:border-tangerine/50">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="eyebrow text-tangerine">Sponsorship Program</span>
+                <span className="border border-tangerine/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-tangerine">
+                  Custom Packages
+                </span>
+              </div>
+              <h3 className="mt-4 font-display text-2xl font-bold">Become an Official Sponsor</h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/70">
+                Elevate your brand presence across main stage activations, digital banners, VIP lounges, and media coverage.
+              </p>
+              <ul className="mt-6 space-y-2 text-sm text-white/60">
+                <li className="flex items-center gap-2">
+                  <span className="text-tangerine">✓</span> Premium stage &amp; hall branding
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-tangerine">✓</span> VIP access passes &amp; lounge privileges
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-tangerine">✓</span> Co-branded marketing campaigns
+                </li>
+              </ul>
+            </div>
+            <div className="mt-8">
+              <Link
+                href="/register/sponsor"
+                className="inline-block w-full border border-tangerine bg-tangerine py-3 text-center text-sm font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-tangerine"
+              >
+                Register as Sponsor →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
 }
 
 /* ---------------- MARQUEE ---------------- */
@@ -103,8 +198,8 @@ function Marquee() {
   const items = [
     "LIVE COOKING", "ARTISAN COFFEE", "STREET EATS", "CRAFT DRINKS",
     "PASTRY LAB", "CHEF TALKS", "FARM TO TABLE", "SWEET TREATS",
-  ];
-  const row = [...items, ...items];
+  ]
+  const row = [...items, ...items]
   return (
     <div className="overflow-hidden border-b border-white/12 bg-marigold py-3">
       <div className="animate-marquee flex w-max gap-6 whitespace-nowrap">
@@ -118,7 +213,7 @@ function Marquee() {
         ))}
       </div>
     </div>
-  );
+  )
 }
 
 /* ---------------- section shell ---------------- */
@@ -130,12 +225,12 @@ function Section({
   children,
   action,
 }: {
-  id?: string;
-  index: string;
-  label: string;
-  title: React.ReactNode;
-  children: React.ReactNode;
-  action?: React.ReactNode;
+  id?: string
+  index: string
+  label: string
+  title: React.ReactNode
+  children: React.ReactNode
+  action?: React.ReactNode
 }) {
   return (
     <section id={id} className="border-b border-white/12">
@@ -155,7 +250,7 @@ function Section({
         <div className="pt-10">{children}</div>
       </div>
     </section>
-  );
+  )
 }
 
 /* ---------------- ABOUT ---------------- */
@@ -190,7 +285,7 @@ function About() {
         </dl>
       </div>
     </Section>
-  );
+  )
 }
 
 /* ---------------- HIGHLIGHTS ---------------- */
@@ -202,14 +297,14 @@ function Highlights() {
     { no: "D", title: "Chef Talks", desc: "Sessions on food trends, business, and craft." },
     { no: "E", title: "Culinary Awards", desc: "Celebrating the best flavors and vendors of the region." },
     { no: "F", title: "Food & Music", desc: "Good eats paired with live performances all weekend." },
-  ];
+  ]
   return (
     <Section id="highlights" index="02" label="The Program" title="Two days, endless flavor">
       <div className="grid border-t border-l border-white/12 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((c) => (
           <div
             key={c.title}
-            className="group border-b border-r border-white/12 p-7 transition-colors hover:bg-white/[0.04]"
+            className="group border-b border-r border-white/12 p-7 transition-colors hover:bg-white/4"
           >
             <div className="font-display text-sm font-bold text-marigold">{c.no}</div>
             <h3 className="mt-6 font-display text-xl font-bold">{c.title}</h3>
@@ -218,7 +313,7 @@ function Highlights() {
         ))}
       </div>
     </Section>
-  );
+  )
 }
 
 /* ---------------- EXHIBITORS ---------------- */
@@ -227,7 +322,7 @@ function Exhibitors() {
     "Miguelito's Ice Cream", "Kapampangan Kitchen", "Brew & Co.", "Sizzle House",
     "Sweet Escape", "Farm Fresh PH", "The Pasta Bar", "Golden Crust",
     "Herb & Spice", "Cocoa Republic", "Street Feast", "Zesty Bites",
-  ];
+  ]
   return (
     <Section
       id="exhibitors"
@@ -236,7 +331,7 @@ function Exhibitors() {
       title="Brands you'll love"
       action={
         <Link
-          href="/tickets"
+          href="/register/exhibitor"
           className="eyebrow border border-white/25 px-5 py-2.5 text-white transition-colors hover:border-white"
         >
           Become an Exhibitor →
@@ -247,14 +342,14 @@ function Exhibitors() {
         {brands.map((b) => (
           <div
             key={b}
-            className="grid h-28 place-items-center border-b border-r border-white/12 p-4 text-center transition-colors hover:bg-white/[0.04]"
+            className="grid h-28 place-items-center border-b border-r border-white/12 p-4 text-center transition-colors hover:bg-white/4"
           >
             <span className="font-display text-base font-bold text-white/70">{b}</span>
           </div>
         ))}
       </div>
     </Section>
-  );
+  )
 }
 
 /* ---------------- SCHEDULE ---------------- */
@@ -278,7 +373,7 @@ function Schedule() {
         ["19:00", "Closing Feast & Celebration"],
       ],
     },
-  ];
+  ]
   return (
     <Section id="schedule" index="04" label="Schedule" title="Plan your two days">
       <div className="grid gap-px border border-white/12 bg-white/12 md:grid-cols-2">
@@ -304,7 +399,7 @@ function Schedule() {
         ))}
       </div>
     </Section>
-  );
+  )
 }
 
 /* ---------------- VENUE ---------------- */
@@ -337,10 +432,10 @@ function Venue() {
         </ul>
       </div>
     </Section>
-  );
+  )
 }
 
-/* ---------------- CTA ---------------- */
+/* ---------------- CTA BANNER ---------------- */
 function CtaBanner() {
   return (
     <section className="border-b border-white/12 bg-chili">
@@ -350,15 +445,15 @@ function CtaBanner() {
           Come hungry. Leave inspired.
         </h2>
         <p className="mx-auto mt-5 max-w-xl text-lg font-medium text-grape-950/70">
-          Secure your spot at Central Luzon&apos;s tastiest weekend of the year.
+          Secure your visitor pass for Central Luzon&apos;s tastiest weekend of the year.
         </p>
         <Link
-          href="/tickets"
+          href="/register/visitor"
           className="mt-9 inline-block border border-grape-950 bg-grape-950 px-9 py-3.5 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-transparent hover:text-grape-950"
         >
-          Get Tickets →
+          Register as Visitor →
         </Link>
       </div>
     </section>
-  );
+  )
 }
