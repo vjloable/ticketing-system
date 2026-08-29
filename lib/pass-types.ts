@@ -1,11 +1,13 @@
 export type PassType = "visitor" | "exhibitor" | "sponsor"
 export type UserRole = "member" | "admin"
+export type PassStatus = "active" | "cancelled" | "pending_verification"
 
 export interface ClaimedPass {
   id: string
   passType: PassType
   claimedAt: string
   ticketCode: string
+  status: PassStatus
   formData: Record<string, any>
 }
 

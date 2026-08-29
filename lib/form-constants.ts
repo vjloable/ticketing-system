@@ -1,3 +1,5 @@
+import { ClaimedPass } from "./pass-types"
+
 export const BANK_PAYMENT_DETAILS = {
   bankName: "Security Bank",
   accountType: "Current",
@@ -180,3 +182,50 @@ export const SPONSORSHIP_TIERS = [
     ],
   },
 ]
+
+// Cutoff Date: September 12, 2026 (7 days before OPFBEX opens on Sept 19)
+export const EDIT_CUTOFF_DATE = new Date("2026-09-12T23:59:59+08:00")
+
+export const POLICY_RULES = {
+  cutoffDateFormatted: "September 12, 2026 (11:59 PM PHT)",
+  supportEmail: "opfbexofficial@gmail.com",
+  supportPhone: "+63 917 521 1106",
+}
+
+// Check if edit window is open based on date
+export function isEditWindowOpen(): boolean {
+  return new Date() <= EDIT_CUTOFF_DATE
+}
+
+// Policy: Can this specific pass be edited?
+export function canEditPass(pass: ClaimedPass): { allowed: boolean; reason?: string } {
+  if (pass.status === "cancelled") {
+    return { allowed: false, reason: "Cancelled passes cannot be edited." }
+  }
+
+  if (!isEditWindowOpen()) {
+    return {
+      allowed: false,
+      reason: `The editing deadline was ${POLICY_RULES.cutoffDateFormatted}. Registration details are now locked for on-site badge printing.`,
+    }
+  }
+
+  return { allowed: true }
+}
+
+// Policy: Can this pass be self-cancelled by the member?
+export function canCancelPass(pass: ClaimedPass): { allowed: boolean; reason?: string } {
+  if (pass.status === "cancelled") {
+    return { allowed: false, reason: "Pass is already cancelled." }
+  }
+
+  // Only free Visitor passes can be cancelled directly by attendees
+  if (pass.passType !== "visitor") {
+    return {
+      allowed: false,
+      reason: `Commercial ${pass.passType} agreements cannot be cancelled online. Please contact the OPFBEX secretariat at ${POLICY_RULES.supportEmail}.`,
+    }
+  }
+
+  return { allowed: true }
+}

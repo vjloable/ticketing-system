@@ -11,6 +11,7 @@ interface AuthContextType {
   logout: () => void
   claimPass: (passType: PassType, formData: Record<string, any>) => ClaimedPass | null
   updatePass: (passId: string, updatedFormData: Record<string, any>) => boolean
+  cancelPass: (passId: string) => boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -21,16 +22,15 @@ const SESSION_KEY = "opfbex_current_session"
 
 async function hashPassword(password: string): Promise<string> {
   const msgUint8 = new TextEncoder().encode(password)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8)
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8)
   const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserAccount | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Helper to load all users from storage
   const getUsersDB = (): Record<string, UserAccount> => {
     try {
       const data = localStorage.getItem(USERS_DB_KEY)
@@ -49,13 +49,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Helper to save credentials to storage
   const saveCredsDB = (db: Record<string, string>) => localStorage.setItem(CREDS_DB_KEY, JSON.stringify(db))
-
-  // Helper to save all users to storage
   const saveUsersDB = (db: Record<string, UserAccount>) => localStorage.setItem(USERS_DB_KEY, JSON.stringify(db))
 
-  // Load session on mount
   useEffect(() => {
     try {
       const activeEmail = localStorage.getItem(SESSION_KEY)
@@ -76,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const usersDb = getUsersDB()
     const credsDb = getCredsDB()
     const normalizedEmail = email.toLowerCase().trim()
-    
+
     const account = usersDb[normalizedEmail]
     if (!account) throw new Error("No account found with this email. Please register first.")
 
@@ -109,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     credsDb[normalizedEmail] = await hashPassword(password)
     saveUsersDB(usersDb)
     saveCredsDB(credsDb)
-    
+
     localStorage.setItem(SESSION_KEY, normalizedEmail)
     setUser(newAccount)
     return true
@@ -128,6 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       passType,
       claimedAt: new Date().toISOString(),
       ticketCode: `OPFBEX-2026-${passType.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      status: passType === "visitor" ? "active" : "pending_verification",
       formData,
     }
 
@@ -136,7 +133,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       passes: [newPass, ...user.passes],
     }
 
-    // Save updated passes to user's persistent record in localStorage
     const db = getUsersDB()
     db[user.email.toLowerCase()] = updatedUser
     saveUsersDB(db)
@@ -165,8 +161,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return true
   }
 
+  const cancelPass = (passId: string): boolean => {
+    if (!user) return false
+
+    const updatedPasses = user.passes.map((p) =>
+      p.id === passId ? { ...p, status: "cancelled" as const } : p
+    )
+
+    const updatedUser: UserAccount = {
+      ...user,
+      passes: updatedPasses,
+    }
+
+    const db = getUsersDB()
+    db[user.email.toLowerCase()] = updatedUser
+    saveUsersDB(db)
+    setUser(updatedUser)
+
+    return true
+  }
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout, claimPass, updatePass }}>
+    <AuthContext.Provider
+      value={{ user, isLoading, login, register, logout, claimPass, updatePass, cancelPass }}
+    >
       {children}
     </AuthContext.Provider>
   )
