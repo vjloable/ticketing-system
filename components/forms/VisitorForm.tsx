@@ -57,23 +57,26 @@ const HEAR_OPTIONS = [
 export function VisitorForm({
   onSubmit,
   initialData,
+  submitLabel = "Complete Visitor Registration →",
 }: {
   onSubmit: (data: VisitorFormData) => void
-  initialData?: { name?: string; email?: string }
+  initialData?: Partial<VisitorFormData> & { name?: string; email?: string }
+  submitLabel?: string
 }) {
+
   const [formData, setFormData] = useState<VisitorFormData>({
-    fullName: initialData?.name || "",
+    fullName: initialData?.fullName || initialData?.name || "",
     email: initialData?.email || "",
-    phone: "",
-    organization: "",
-    jobTitle: "",
-    cityProvince: "",
-    age: "",
-    purposes: [],
-    otherPurpose: "",
-    daysAttending: [],
-    howDidYouHear: "",
-    privacyConsent: false,
+    phone: initialData?.phone || "",
+    organization: initialData?.organization || "",
+    jobTitle: initialData?.jobTitle || "",
+    cityProvince: initialData?.cityProvince || "",
+    age: initialData?.age || "",
+    purposes: initialData?.purposes || [],
+    otherPurpose: initialData?.otherPurpose || "",
+    daysAttending: initialData?.daysAttending || [],
+    howDidYouHear: initialData?.howDidYouHear || "",
+    privacyConsent: initialData?.privacyConsent || false,
   })
 
   const [hasOtherPurpose, setHasOtherPurpose] = useState(false)
@@ -421,7 +424,7 @@ export function VisitorForm({
         type="submit"
         className="w-full border border-marigold bg-marigold py-4 text-sm font-bold uppercase tracking-wider text-grape-950 transition-all hover:bg-transparent hover:text-marigold cursor-pointer"
       >
-        Complete Visitor Registration →
+        {submitLabel}
       </button>
     </form>
   )

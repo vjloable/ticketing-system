@@ -10,6 +10,7 @@ interface AuthContextType {
   register: (name: string, email: string, password: string) => Promise<boolean>
   logout: () => void
   claimPass: (passType: PassType, formData: Record<string, any>) => ClaimedPass | null
+  updatePass: (passId: string, updatedFormData: Record<string, any>) => boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -144,8 +145,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return newPass
   }
 
+  const updatePass = (passId: string, updatedFormData: Record<string, any>): boolean => {
+    if (!user) return false
+
+    const updatedPasses = user.passes.map((p) =>
+      p.id === passId ? { ...p, formData: updatedFormData } : p
+    )
+
+    const updatedUser: UserAccount = {
+      ...user,
+      passes: updatedPasses,
+    }
+
+    const db = getUsersDB()
+    db[user.email.toLowerCase()] = updatedUser
+    saveUsersDB(db)
+    setUser(updatedUser)
+
+    return true
+  }
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout, claimPass }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout, claimPass, updatePass }}>
       {children}
     </AuthContext.Provider>
   )

@@ -82,24 +82,25 @@ const SPONSORSHIP_TIERS = [
 export function SponsorForm({
   onSubmit,
   initialData,
+  submitLabel = "Submit Sponsorship Application →",
 }: {
   onSubmit: (data: SponsorFormData) => void
-  initialData?: { name?: string; email?: string }
+  initialData?: Partial<SponsorFormData> & { name?: string; email?: string }
+  submitLabel?: string
 }) {
   const [formData, setFormData] = useState<SponsorFormData>({
-    companyName: "",
-    contactPerson: initialData?.name || "",
+    companyName: initialData?.companyName || "",
+    contactPerson: initialData?.contactPerson || initialData?.name || "",
     email: initialData?.email || "",
-    
-    phone: "",
-    sponsorshipTier: "",
-    preferredBoothNo: "",
-    boothWithShellStructure: "",
-    sellingAtEvent: "",
-    cookingOnSite: "",
-    extraElectricalLoad: "",
-    additionalIds: "",
-    agree: false,
+    phone: initialData?.phone || "",
+    sponsorshipTier: initialData?.sponsorshipTier || "",
+    preferredBoothNo: initialData?.preferredBoothNo || "",
+    boothWithShellStructure: initialData?.boothWithShellStructure || "",
+    sellingAtEvent: initialData?.sellingAtEvent || "",
+    cookingOnSite: initialData?.cookingOnSite || "",
+    extraElectricalLoad: initialData?.extraElectricalLoad || "",
+    additionalIds: initialData?.additionalIds || "",
+    agree: initialData?.agree || false,
   })
 
   const [errorMsg, setErrorMsg] = useState("")
@@ -514,9 +515,9 @@ export function SponsorForm({
       {/* Submit CTA */}
       <button
         type="submit"
-        className="w-full border border-tangerine bg-tangerine py-4 text-sm font-bold uppercase tracking-wider text-grape-950 transition-all hover:bg-transparent hover:text-tangerine"
+        className="w-full border border-tangerine bg-tangerine py-4 text-sm font-bold uppercase tracking-wider text-grape-950 transition-all hover:bg-transparent hover:text-tangerine cursor-pointer"
       >
-        Submit Sponsorship Application →
+        {submitLabel}
       </button>
     </form>
   )

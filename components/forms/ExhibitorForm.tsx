@@ -62,23 +62,25 @@ const EXHIBITOR_PACKAGES = [
 export function ExhibitorForm({
   onSubmit,
   initialData,
+  submitLabel = "Submit Exhibitor Application →",
 }: {
   onSubmit: (data: ExhibitorFormData) => void
-  initialData?: { name?: string; email?: string }
+  initialData?: Partial<ExhibitorFormData> & { name?: string; email?: string }
+  submitLabel?: string
 }) {
   const [formData, setFormData] = useState<ExhibitorFormData>({
-    companyName: "",
-    contactPerson: initialData?.name || "",
+    companyName: initialData?.companyName || "",
+    contactPerson: initialData?.contactPerson || initialData?.name || "",
     email: initialData?.email || "",
-    phone: "",
-    packageSelection: "",
-    numberOfBooths: "",
-    boothWithShellStructure: "",
-    sellingAtEvent: "",
-    cookingOnSite: "",
-    additionalIds: "",
-    additionalFurniture: "",
-    agree: false,
+    phone: initialData?.phone || "",
+    packageSelection: initialData?.packageSelection || "",
+    numberOfBooths: initialData?.numberOfBooths || "",
+    boothWithShellStructure: initialData?.boothWithShellStructure || "",
+    sellingAtEvent: initialData?.sellingAtEvent || "",
+    cookingOnSite: initialData?.cookingOnSite || "",
+    additionalIds: initialData?.additionalIds || "",
+    additionalFurniture: initialData?.additionalFurniture || "",
+    agree: initialData?.agree || false,
   })
 
   const [errorMsg, setErrorMsg] = useState("")
@@ -473,9 +475,9 @@ export function ExhibitorForm({
       {/* Submit CTA */}
       <button
         type="submit"
-        className="w-full border border-basil bg-basil py-4 text-sm font-bold uppercase tracking-wider text-grape-950 transition-all hover:bg-transparent hover:text-basil"
+        className="w-full border border-basil bg-basil py-4 text-sm font-bold uppercase tracking-wider text-grape-950 transition-all hover:bg-transparent hover:text-basil cursor-pointer"
       >
-        Submit Exhibitor Application →
+        {submitLabel}
       </button>
     </form>
   )
