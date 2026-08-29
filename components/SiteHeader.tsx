@@ -49,7 +49,7 @@ export function SiteHeader() {
             <div className="relative">
               <button
                 onClick={() => setUserDropdown((v) => !v)}
-                className="flex items-center gap-2 border border-white/20 bg-grape-900 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:border-white/40"
+                className="flex items-center gap-2 border border-white/20 bg-grape-900 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:border-white/40 cursor-pointer"
               >
                 <span className="inline-block h-2 w-2 rounded-full bg-basil"></span>
                 <span className="max-w-25 truncate">{user.name}</span>
@@ -77,7 +77,7 @@ export function SiteHeader() {
                       setUserDropdown(false)
                       logout()
                     }}
-                    className="w-full border-t border-white/10 px-4 py-2.5 text-left text-xs text-chili transition-colors hover:bg-white/10"
+                    className="w-full border-t border-white/10 px-4 py-2.5 text-left text-xs text-chili transition-colors hover:bg-white/10 cursor-pointer"
                   >
                     Sign Out
                   </button>
@@ -150,7 +150,7 @@ export function SiteHeader() {
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
-                  className="border border-white/20 py-2.5 text-center text-xs font-bold uppercase tracking-wider text-white"
+                  className="border border-white/20 py-2.5 text-center text-xs font-bold uppercase tracking-wider text-white cursor-pointer"
                 >
                   Sign In / Register Account
                 </Link>

@@ -6,25 +6,63 @@ import { UserAccount, PassType, ClaimedPass } from "./pass-types"
 interface AuthContextType {
   user: UserAccount | null
   isLoading: boolean
-  login: (email: string, password?: string) => Promise<boolean>
-  register: (name: string, email: string, password?: string) => Promise<boolean>
+  login: (email: string, password: string) => Promise<boolean>
+  register: (name: string, email: string, password: string) => Promise<boolean>
   logout: () => void
   claimPass: (passType: PassType, formData: Record<string, any>) => ClaimedPass | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-const STORAGE_KEY = "opfbex_auth_user"
+const USERS_DB_KEY = "opfbex_users_db"
+const CREDS_DB_KEY = "opfbex_creds_db"
+const SESSION_KEY = "opfbex_current_session"
+
+async function hashPassword(password: string): Promise<string> {
+  const msgUint8 = new TextEncoder().encode(password)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserAccount | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  // Helper to load all users from storage
+  const getUsersDB = (): Record<string, UserAccount> => {
+    try {
+      const data = localStorage.getItem(USERS_DB_KEY)
+      return data ? JSON.parse(data) : {}
+    } catch {
+      return {}
+    }
+  }
+
+  const getCredsDB = (): Record<string, string> => {
+    try {
+      const data = localStorage.getItem(CREDS_DB_KEY)
+      return data ? JSON.parse(data) : {}
+    } catch {
+      return {}
+    }
+  }
+
+  // Helper to save credentials to storage
+  const saveCredsDB = (db: Record<string, string>) => localStorage.setItem(CREDS_DB_KEY, JSON.stringify(db))
+
+  // Helper to save all users to storage
+  const saveUsersDB = (db: Record<string, UserAccount>) => localStorage.setItem(USERS_DB_KEY, JSON.stringify(db))
+
+  // Load session on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        setUser(JSON.parse(stored))
+      const activeEmail = localStorage.getItem(SESSION_KEY)
+      if (activeEmail) {
+        const db = getUsersDB()
+        if (db[activeEmail]) {
+          setUser(db[activeEmail])
+        }
       }
     } catch (e) {
       console.error("Failed to load user session", e)
@@ -33,42 +71,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const saveUser = (updatedUser: UserAccount | null) => {
-    setUser(updatedUser)
-    if (updatedUser) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser))
-    } else {
-      localStorage.removeItem(STORAGE_KEY)
-    }
-  }
+  const login = async (email: string, password: string): Promise<boolean> => {
+    const usersDb = getUsersDB()
+    const credsDb = getCredsDB()
+    const normalizedEmail = email.toLowerCase().trim()
+    
+    const account = usersDb[normalizedEmail]
+    if (!account) throw new Error("No account found with this email. Please register first.")
 
-  const login = async (email: string): Promise<boolean> => {
-    // Member authentication (defaults role to 'member')
-    const existing: UserAccount = {
-      id: "usr_" + Math.random().toString(36).substring(2, 9),
-      name: email.split("@")[0],
-      email,
-      role: "member",
-      passes: user?.passes || [],
-    }
-    saveUser(existing)
+    const hashedInput = await hashPassword(password)
+    const storedHash = credsDb[normalizedEmail]
+
+    if (storedHash && storedHash !== hashedInput) throw new Error("Invalid password. Please try again.")
+
+    localStorage.setItem(SESSION_KEY, normalizedEmail)
+    setUser(account)
     return true
   }
 
-  const register = async (name: string, email: string): Promise<boolean> => {
-    const newUser: UserAccount = {
+  const register = async (name: string, email: string, password: string): Promise<boolean> => {
+    const usersDb = getUsersDB()
+    const credsDb = getCredsDB()
+    const normalizedEmail = email.toLowerCase().trim()
+
+    if (usersDb[normalizedEmail]) throw new Error("An account with this email already exists. Please sign in instead.")
+
+    const newAccount: UserAccount = {
       id: "usr_" + Math.random().toString(36).substring(2, 9),
-      name,
-      email,
+      name: name.trim(),
+      email: normalizedEmail,
       role: "member",
       passes: [],
     }
-    saveUser(newUser)
+
+    usersDb[normalizedEmail] = newAccount
+    credsDb[normalizedEmail] = await hashPassword(password)
+    saveUsersDB(usersDb)
+    saveCredsDB(credsDb)
+    
+    localStorage.setItem(SESSION_KEY, normalizedEmail)
+    setUser(newAccount)
     return true
   }
 
   const logout = () => {
-    saveUser(null)
+    localStorage.removeItem(SESSION_KEY)
+    setUser(null)
   }
 
   const claimPass = (passType: PassType, formData: Record<string, any>): ClaimedPass | null => {
@@ -87,7 +135,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       passes: [newPass, ...user.passes],
     }
 
-    saveUser(updatedUser)
+    // Save updated passes to user's persistent record in localStorage
+    const db = getUsersDB()
+    db[user.email.toLowerCase()] = updatedUser
+    saveUsersDB(db)
+    setUser(updatedUser)
+
     return newPass
   }
 

@@ -102,7 +102,7 @@ export default function RegisterPassPage({
         <div className="mx-auto max-w-lg border border-white/15 bg-grape-900 p-8 sm:p-12 text-center">
           <span className="text-4xl">🎉</span>
           <div className="mt-4 eyebrow text-basil">Registration Successful</div>
-          <h1 className="mt-2 font-display text-3xl font-black">You&aposre Registered!</h1>
+          <h1 className="mt-2 font-display text-3xl font-black">You are Registered!</h1>
           <p className="mt-3 text-sm text-white/70">
             Your {meta.badge} has been attached to your member account.
           </p>

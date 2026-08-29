@@ -240,7 +240,7 @@ export function VisitorForm({
                   value={age}
                   checked={isSelected}
                   onChange={() => setFormData((prev) => ({ ...prev, age }))}
-                  className="accent-marigold h-4 w-4"
+                  className="accent-marigold h-4 w-4 cursor-pointer"
                 />
                 <span>{age}</span>
               </label>
@@ -274,7 +274,7 @@ export function VisitorForm({
                   type="checkbox"
                   checked={checked}
                   onChange={() => handlePurposeToggle(opt.label)}
-                  className="accent-marigold mt-0.5 h-4 w-4 shrink-0"
+                  className="accent-marigold mt-0.5 h-4 w-4 shrink-0 cursor-pointer"
                 />
                 <span className="leading-snug">{opt.label}</span>
               </label>
@@ -294,7 +294,7 @@ export function VisitorForm({
                 type="checkbox"
                 checked={hasOtherPurpose}
                 onChange={(e) => setHasOtherPurpose(e.target.checked)}
-                className="accent-marigold h-4 w-4 shrink-0"
+                className="accent-marigold h-4 w-4 shrink-0 cursor-pointer"
               />
               <span>Other:</span>
             </label>
@@ -338,7 +338,7 @@ export function VisitorForm({
                   type="checkbox"
                   checked={checked}
                   onChange={() => handleDayToggle(day)}
-                  className="accent-marigold h-4 w-4"
+                  className="accent-marigold h-4 w-4 cursor-pointer"
                 />
                 <span>{day}</span>
               </label>
@@ -372,7 +372,7 @@ export function VisitorForm({
                   onChange={() =>
                     setFormData((prev) => ({ ...prev, howDidYouHear: opt }))
                   }
-                  className="accent-marigold h-4 w-4"
+                  className="accent-marigold h-4 w-4 cursor-pointer"
                 />
                 <span>{opt}</span>
               </label>
@@ -407,7 +407,7 @@ export function VisitorForm({
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, privacyConsent: e.target.checked }))
             }
-            className="accent-marigold mt-0.5 h-4 w-4 shrink-0"
+            className="accent-marigold mt-0.5 h-4 w-4 shrink-0 cursor-pointer"
             required
           />
           <span>
@@ -419,7 +419,7 @@ export function VisitorForm({
       {/* Submit CTA */}
       <button
         type="submit"
-        className="w-full border border-marigold bg-marigold py-4 text-sm font-bold uppercase tracking-wider text-grape-950 transition-all hover:bg-transparent hover:text-marigold"
+        className="w-full border border-marigold bg-marigold py-4 text-sm font-bold uppercase tracking-wider text-grape-950 transition-all hover:bg-transparent hover:text-marigold cursor-pointer"
       >
         Complete Visitor Registration →
       </button>

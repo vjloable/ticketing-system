@@ -31,8 +31,8 @@ function LoginForm() {
         await login(email, password)
       }
       router.push(redirect)
-    } catch (err) {
-      setError("An error occurred during authentication.")
+    } catch (err: any) {
+      setError(err?.message || "An error occurred during authentication.")
     }
   }
 
@@ -95,7 +95,7 @@ function LoginForm() {
 
         <button
           type="submit"
-          className="mt-6 w-full border border-marigold bg-marigold py-3 text-sm font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-marigold"
+          className="mt-6 w-full border border-marigold bg-marigold py-3 text-sm font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-marigold cursor-pointer"
         >
           {isRegister ? "Create Account & Continue" : "Sign In"}
         </button>
@@ -108,7 +108,7 @@ function LoginForm() {
             setIsRegister(!isRegister)
             setError("")
           }}
-          className="text-xs text-white/60 hover:text-white"
+          className="text-xs text-white/60 hover:text-white cursor-pointer"
         >
           {isRegister
             ? "Already have an account? Sign In"
