@@ -110,3 +110,50 @@ export function SelectInput({
     </div>
   )
 }
+
+export function YesNoRadio({
+  label,
+  value,
+  onChange,
+  hint,
+  required = true,
+  accent = "accent-marigold",
+  selectedBorder = "border-marigold bg-marigold/10",
+}: {
+  label: string
+  value: string
+  onChange: (val: "Yes" | "No") => void
+  hint?: string
+  required?: boolean
+  accent?: string
+  selectedBorder?: string
+}) {
+  return (
+    <div className="space-y-2">
+      <label className="eyebrow block text-white/70">
+        {label} {required && <span className="text-chili">*</span>}
+      </label>
+      {hint && <p className="text-xs text-white/50">{hint}</p>}
+      <div className="flex gap-4">
+        {["Yes", "No"].map((opt) => (
+          <label
+            key={opt}
+            className={`flex flex-1 cursor-pointer items-center justify-center gap-2 border p-3 text-sm transition-all ${
+              value === opt
+                ? `${selectedBorder} text-white font-bold`
+                : "border-white/10 bg-grape-950/60 text-white/70 hover:border-white/25"
+            }`}
+          >
+            <input
+              type="radio"
+              checked={value === opt}
+              onChange={() => onChange(opt as "Yes" | "No")}
+              className={`${accent} h-4 w-4`}
+            />
+            <span>{opt}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  )
+}

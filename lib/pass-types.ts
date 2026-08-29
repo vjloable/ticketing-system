@@ -23,21 +23,28 @@ export interface VisitorFormData {
   phone: string
   organization?: string
   jobTitle?: string
-  interests: string[]
-  daysAttending: "day1" | "day2" | "both"
-  howDidYouHear?: string
+  cityProvince: string
+  age: string
+  purposes: string[]
+  otherPurpose?: string
+  daysAttending: string[]
+  howDidYouHear: string
+  privacyConsent: boolean
 }
 
 export interface ExhibitorFormData {
   companyName: string
-  brandName: string
   contactPerson: string
   email: string
   phone: string
-  websiteOrSocial?: string
-  productCategory: string
-  boothSizePreference: "standard" | "corner" | "custom"
-  specialRequirements?: string
+  packageSelection: "MSME Booth" | "FOOD EXHIBITOR" | "NON-FOOD (SERVICES) EXHIBITOR" | "LOBBY TABLE SPACE" | ""
+  numberOfBooths: string
+  boothWithShellStructure: "Yes" | "No" | ""
+  sellingAtEvent: "Yes" | "No" | ""
+  cookingOnSite: "Yes" | "No" | ""
+  additionalIds: string
+  additionalFurniture: string
+  agree: boolean
 }
 
 export interface SponsorFormData {
@@ -45,6 +52,12 @@ export interface SponsorFormData {
   contactPerson: string
   email: string
   phone: string
-  sponsorshipTier: "presenting" | "platinum" | "gold" | "silver"
-  customObjectives?: string
+  sponsorshipTier: "CO-PRESENTOR" | "GOLD" | "SILVER" | "BRONZE" | "AFFILIATE" | ""
+  preferredBoothNo: string
+  boothWithShellStructure: "Yes" | "No" | ""
+  sellingAtEvent: "Yes" | "No" | ""
+  cookingOnSite: "Yes" | "No" | ""
+  extraElectricalLoad: "Yes" | "No" | ""
+  additionalIds: string
+  agree: boolean
 }
