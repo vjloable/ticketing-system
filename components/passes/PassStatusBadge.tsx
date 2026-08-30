@@ -8,6 +8,12 @@ export function PassStatusBadge({ status }: { status: PassStatus }) {
           ● Active Pass
         </span>
       )
+    case "checked_in":
+      return (
+        <span className="border border-lime/50 bg-lime/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-lime">
+          ✓ Checked In
+        </span>
+      )
     case "pending_verification":
       return (
         <span className="border border-marigold/40 bg-marigold/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-marigold">

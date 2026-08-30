@@ -1,7 +1,9 @@
 "use client"
 
+import Link from "next/link"
 import { ClaimedPass } from "@/lib/pass-types"
 import { PassStatusBadge } from "./PassStatusBadge"
+import { PassQRCode } from "./PassQRCode"
 import { PaymentDetailsCard } from "@/components/forms/PaymentDetailsCard"
 import { VenueLayoutBanner } from "@/components/forms/VenueLayoutBanner"
 import { canEditPass, canCancelPass } from "@/lib/form-constants"
@@ -40,12 +42,32 @@ export function PassDetailsModal({
           </button>
         </div>
 
+        {/* QR Code & Pass Overview Banner */}
+        <div className="my-6 border border-white/10 bg-grape-950 p-5 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex justify-center">
+            <PassQRCode value={pass.ticketCode} size={130} showCodeText={false} />
+          </div>
+          <div className="flex-1 space-y-2 text-center sm:text-left">
+            <div className="text-[10px] uppercase tracking-wider text-white/40">Official Ticket Code</div>
+            <div className="font-mono text-xl font-black tracking-wider text-marigold">
+              {pass.ticketCode}
+            </div>
+            <p className="text-xs text-white/60">
+              Scan this QR code at the SMX Clark entrance desk for instant on-site check-in.
+            </p>
+            <div className="pt-2">
+              <Link
+                href={`/passes/${pass.id}/print`}
+                className="inline-flex items-center gap-1.5 border border-marigold bg-marigold/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-marigold hover:bg-marigold hover:text-grape-950 transition-colors"
+              >
+                <span>🖨️</span> Print Event Badge
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* Ticket Summary */}
         <div className="my-6 space-y-3 divide-y divide-white/10 text-xs">
-          <div className="flex justify-between py-2">
-            <span className="text-white/40 uppercase font-semibold">Ticket Code</span>
-            <span className="font-mono font-bold text-marigold text-sm">{pass.ticketCode}</span>
-          </div>
           <div className="flex justify-between py-2">
             <span className="text-white/40 uppercase font-semibold">Registration Date</span>
             <span className="text-white/80">{new Date(pass.claimedAt).toLocaleString()}</span>

@@ -190,20 +190,30 @@ export default function MyPassesPage() {
 
                   {/* Actions */}
                   <div className="mt-6 space-y-3">
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => setViewingPass(pass)}
-                        className="flex-1 border border-white/20 bg-white/5 py-2 text-xs font-semibold uppercase tracking-wider text-white hover:bg-white/10 cursor-pointer"
+                        className="flex-1 min-w-25 border border-white/20 bg-white/5 py-2 text-xs font-semibold uppercase tracking-wider text-white hover:bg-white/10 cursor-pointer"
                       >
                         View Details
                       </button>
 
+                      {!isCancelled && (
+                        <Link
+                          href={`/passes/${pass.id}/print`}
+                          className="border border-marigold/40 bg-marigold/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-marigold hover:bg-marigold hover:text-grape-950 transition-colors flex items-center gap-1 cursor-pointer"
+                          title="Print Event Badge"
+                        >
+                          <span>🖨️</span> Print
+                        </Link>
+                      )}
+
                       {editPolicy.allowed && (
                         <button
                           onClick={() => setEditingPass(pass)}
-                          className="flex-1 border border-marigold/40 bg-marigold/10 py-2 text-xs font-semibold uppercase tracking-wider text-marigold hover:bg-marigold hover:text-grape-950 cursor-pointer"
+                          className="border border-white/20 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-white hover:bg-white/10 cursor-pointer"
                         >
-                          Edit Info
+                          Edit
                         </button>
                       )}
 

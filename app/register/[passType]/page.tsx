@@ -4,6 +4,7 @@ import { use } from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { PassType, ClaimedPass } from "@/lib/pass-types"
+import { isRegistrationOpen, POLICY_RULES } from "@/lib/form-constants"
 import { useAuth } from "@/lib/auth-context"
 import { VisitorForm } from "@/components/forms/VisitorForm"
 import { ExhibitorForm } from "@/components/forms/ExhibitorForm"
@@ -47,6 +48,8 @@ export default function RegisterPassPage({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
+  const registrationCheck = isRegistrationOpen(passType)
+
   const handleFormSubmit = async (formData: any) => {
     if (!user) return
     setIsSubmitting(true)
@@ -70,6 +73,37 @@ export default function RegisterPassPage({
     return (
       <div className="flex min-h-[60vh] items-center justify-center bg-grape-950">
         <p className="eyebrow text-white/50">Loading registration...</p>
+      </div>
+    )
+  }
+
+  // Cutoff policy check
+  if (!registrationCheck.isOpen) {
+    return (
+      <div className="bg-grape-950 py-20 px-5">
+        <div className="mx-auto max-w-xl border border-chili/30 bg-grape-900 p-8 sm:p-12 text-center">
+          <span className="inline-block border border-chili/40 bg-chili/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-chili">
+            Registration Closed
+          </span>
+          <h1 className="mt-6 font-display text-3xl font-extrabold tracking-tight sm:text-4xl text-white">
+            Deadline Reached
+          </h1>
+          <p className="mt-4 text-white/70 leading-relaxed">
+            {registrationCheck.reason}
+          </p>
+          <div className="mt-6 border border-white/10 bg-grape-950 p-4 text-xs text-white/60 space-y-1 text-left">
+            <p><span className="text-white/40">Email:</span> {POLICY_RULES.supportEmail}</p>
+            <p><span className="text-white/40">Hotline:</span> {POLICY_RULES.supportPhone}</p>
+          </div>
+          <div className="mt-8 flex justify-center gap-3">
+            <Link
+              href="/"
+              className="border border-white/20 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:border-white cursor-pointer"
+            >
+              Return to Home
+            </Link>
+          </div>
+        </div>
       </div>
     )
   }
@@ -139,16 +173,16 @@ export default function RegisterPassPage({
 
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
-              href="/passes"
+              href={`/passes/${successPass.id}/print`}
               className="flex-1 border border-marigold bg-marigold py-3 text-center text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-marigold cursor-pointer"
             >
-              View My Passes
+              🖨️ Print Badge
             </Link>
             <Link
-              href="/"
+              href="/passes"
               className="flex-1 border border-white/20 py-3 text-center text-xs font-bold uppercase tracking-wider text-white hover:border-white cursor-pointer"
             >
-              Return to Home
+              View My Passes
             </Link>
           </div>
         </div>
