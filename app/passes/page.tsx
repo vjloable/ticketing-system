@@ -15,25 +15,33 @@ export default function MyPassesPage() {
   const [viewingPass, setViewingPass] = useState<ClaimedPass | null>(null)
   const [editingPass, setEditingPass] = useState<ClaimedPass | null>(null)
   const [cancellingPass, setCancellingPass] = useState<ClaimedPass | null>(null)
-  const [feedbackMsg, setFeedbackMsg] = useState<{ type: "success" | "info"; text: string } | null>(null)
+  const [feedbackMsg, setFeedbackMsg] = useState<{ type: "success" | "info" | "error"; text: string } | null>(null)
 
-  const showFeedback = (text: string, type: "success" | "info" = "success") => {
+  const showFeedback = (text: string, type: "success" | "info" | "error" = "success") => {
     setFeedbackMsg({ text, type })
     setTimeout(() => setFeedbackMsg(null), 4500)
   }
 
-  const handleSaveEdit = (updatedFormData: any) => {
+  const handleSaveEdit = async (updatedFormData: any) => {
     if (!editingPass) return
-    updatePass(editingPass.id, updatedFormData)
+    const success = await updatePass(editingPass.id, updatedFormData)
     setEditingPass(null)
-    showFeedback("Registration details updated successfully!", "success")
+    if (success) {
+      showFeedback("Registration details updated in Supabase!", "success")
+    } else {
+      showFeedback("Failed to update pass. Please try again.", "error")
+    }
   }
 
-  const handleConfirmCancel = () => {
+  const handleConfirmCancel = async () => {
     if (!cancellingPass) return
-    cancelPass(cancellingPass.id)
+    const success = await cancelPass(cancellingPass.id)
     setCancellingPass(null)
-    showFeedback(`Pass (${cancellingPass.ticketCode}) has been cancelled.`, "info")
+    if (success) {
+      showFeedback(`Pass (${cancellingPass.ticketCode}) has been cancelled.`, "info")
+    } else {
+      showFeedback("Failed to cancel pass. Please try again.", "error")
+    }
   }
 
   if (isLoading) {
@@ -89,7 +97,9 @@ export default function MyPassesPage() {
             className={`mt-6 border p-4 text-xs font-semibold ${
               feedbackMsg.type === "success"
                 ? "border-basil/50 bg-basil/10 text-basil"
-                : "border-chili/50 bg-chili/10 text-chili"
+                : feedbackMsg.type === "error"
+                ? "border-chili/50 bg-chili/10 text-chili"
+                : "border-marigold/50 bg-marigold/10 text-marigold"
             }`}
           >
             {feedbackMsg.type === "success" ? "✓" : "ℹ"} {feedbackMsg.text}

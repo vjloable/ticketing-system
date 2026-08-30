@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useState } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 
@@ -10,10 +10,19 @@ function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
-  const { login, register } = useAuth()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [emailSentTo, setEmailSentTo] = useState<string | null>(null)
+  const { user, login, register } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get("redirect") || "/"
+
+  // Automatically redirect if user is already logged in (or logs in from another tab)
+  useEffect(() => {
+    if (user) {
+      router.push(redirect)
+    }
+  }, [user, redirect, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,16 +33,66 @@ function LoginForm() {
       return
     }
 
+    setIsSubmitting(true)
+
     try {
       if (isRegister) {
-        await register(name, email, password)
+        const result = await register(name, email, password)
+        if (result.needsConfirmation) {
+          setEmailSentTo(email)
+          return
+        }
       } else {
         await login(email, password)
       }
       router.push(redirect)
     } catch (err: any) {
       setError(err?.message || "An error occurred during authentication.")
+    } finally {
+      setIsSubmitting(false)
     }
+  }
+
+  // If user is already active, show a quick transitional state while redirecting
+  if (user) {
+    return (
+      <div className="mx-auto max-w-md border border-white/12 bg-grape-900 p-8 sm:p-10 text-center">
+        <p className="eyebrow text-basil">Signed In</p>
+        <h2 className="mt-2 font-display text-2xl font-bold">Redirecting you...</h2>
+      </div>
+    )
+  }
+
+  // Screen shown when confirmation email was dispatched
+  if (emailSentTo) {
+    return (
+      <div className="mx-auto max-w-md border border-white/12 bg-grape-900 p-8 sm:p-10 text-center">
+        <div className="text-4xl">✉️</div>
+        <div className="mt-3 eyebrow text-marigold">Check Your Inbox</div>
+        <h1 className="mt-2 font-display text-2xl font-black sm:text-3xl">
+          Confirm Your Account
+        </h1>
+        <p className="mt-4 text-sm text-white/70 leading-relaxed">
+          We&apos;ve sent a verification link to{" "}
+          <span className="font-bold text-white">{emailSentTo}</span>.
+        </p>
+        <p className="mt-2 text-xs text-white/50">
+          Please click the link in your email to activate your OPFBEX 2026 account. Once confirmed, this page will automatically redirect you.
+        </p>
+
+        <div className="mt-8 border-t border-white/10 pt-6">
+          <button
+            onClick={() => {
+              setEmailSentTo(null)
+              setIsRegister(false)
+            }}
+            className="w-full border border-marigold bg-marigold py-3 text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-marigold cursor-pointer"
+          >
+            Go to Sign In
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -86,6 +145,7 @@ function LoginForm() {
           <input
             type="password"
             required
+            minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
@@ -95,9 +155,14 @@ function LoginForm() {
 
         <button
           type="submit"
-          className="mt-6 w-full border border-marigold bg-marigold py-3 text-sm font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-marigold cursor-pointer"
+          disabled={isSubmitting}
+          className="mt-6 w-full border border-marigold bg-marigold py-3 text-sm font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-marigold cursor-pointer disabled:opacity-50"
         >
-          {isRegister ? "Create Account & Continue" : "Sign In"}
+          {isSubmitting
+            ? "Processing..."
+            : isRegister
+            ? "Create Account & Continue"
+            : "Sign In"}
         </button>
       </form>
 

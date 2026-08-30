@@ -1,189 +1,265 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useState } from "react"
-import { UserAccount, PassType, ClaimedPass } from "./pass-types"
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react"
+import { UserAccount, PassType, ClaimedPass, PassStatus, UserRole } from "./pass-types"
+import { createClient } from "./supabase/client"
 
 interface AuthContextType {
   user: UserAccount | null
   isLoading: boolean
   login: (email: string, password: string) => Promise<boolean>
-  register: (name: string, email: string, password: string) => Promise<boolean>
-  logout: () => void
-  claimPass: (passType: PassType, formData: Record<string, any>) => ClaimedPass | null
-  updatePass: (passId: string, updatedFormData: Record<string, any>) => boolean
-  cancelPass: (passId: string) => boolean
+  register: (
+    name: string, 
+    email: string, 
+    password: string
+  ) => Promise<{ success: boolean; needsConfirmation?: boolean }>
+  logout: () => Promise<void>
+  claimPass: (passType: PassType, formData: Record<string, any>) => Promise<ClaimedPass | null>
+  updatePass: (passId: string, updatedFormData: Record<string, any>) => Promise<boolean>
+  cancelPass: (passId: string) => Promise<boolean>
+  refreshUserPasses: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-const USERS_DB_KEY = "opfbex_users_db"
-const CREDS_DB_KEY = "opfbex_creds_db"
-const SESSION_KEY = "opfbex_current_session"
-
-async function hashPassword(password: string): Promise<string> {
-  const msgUint8 = new TextEncoder().encode(password)
-  const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserAccount | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
 
-  const getUsersDB = (): Record<string, UserAccount> => {
+  // Fetch Profile & Claimed Passes from Supabase
+  const loadUserData = useCallback(async (
+    userId: string, 
+    email: string
+  ) => {
     try {
-      const data = localStorage.getItem(USERS_DB_KEY)
-      return data ? JSON.parse(data) : {}
-    } catch {
-      return {}
+      // 1. Fetch Profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, role")
+        .eq("id", userId)
+        .single()
+
+      // 2. Fetch Passes
+      const { data: passesData } = await supabase
+        .from("passes")
+        .select("id, pass_type, ticket_code, status, form_data, created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+
+      const mappedPasses: ClaimedPass[] = (passesData || []).map((p) => ({
+        id: p.id,
+        passType: p.pass_type as PassType,
+        ticketCode: p.ticket_code,
+        status: p.status as PassStatus,
+        formData: p.form_data,
+        claimedAt: p.created_at
+      }))
+
+      const account: UserAccount = {
+        id: userId,
+        name: profile?.full_name || email.split("@")[0],
+        email: profile?.email || email,
+        role: (profile?.role as UserRole) || "member",
+        passes: mappedPasses
+      }
+
+      setUser(account)
+    } catch (err) {
+      console.error("Error loading user profile & passes: ", err)
     }
-  }
+  }, [supabase])
 
-  const getCredsDB = (): Record<string, string> => {
-    try {
-      const data = localStorage.getItem(CREDS_DB_KEY)
-      return data ? JSON.parse(data) : {}
-    } catch {
-      return {}
-    }
-  }
-
-  const saveCredsDB = (db: Record<string, string>) => localStorage.setItem(CREDS_DB_KEY, JSON.stringify(db))
-  const saveUsersDB = (db: Record<string, UserAccount>) => localStorage.setItem(USERS_DB_KEY, JSON.stringify(db))
-
+  // Initialize Session and Listener
   useEffect(() => {
-    try {
-      const activeEmail = localStorage.getItem(SESSION_KEY)
-      if (activeEmail) {
-        const db = getUsersDB()
-        if (db[activeEmail]) {
-          setUser(db[activeEmail])
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, } = await supabase.auth.getSession()
+
+        if (session?.user) {
+          await loadUserData(session.user.id, session.user.email || "")
+        } else {
+          setUser(null)
+        }
+      } catch (err) {
+        console.error("Failed to load user session", err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    initializeAuth()
+
+    const { data: { subscription }, } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?. user) {
+        await loadUserData(session.user.id, session.user.email || "")
+      } else {
+        setUser(null)
+      }
+      setIsLoading(false)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase, loadUserData])
+
+  const refreshUserPasses = async () => {
+    if (!user) return
+    await loadUserData(user.id, user.email)
+  }
+
+  const login = async (
+    email: string, 
+    password: string
+  ): Promise<boolean> => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password
+    })
+
+    if (error) throw new Error(error.message)
+
+    return true
+  }
+
+  const register = async (
+    name: string,
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; needsConfirmation?: boolean }> => {
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
+      password,
+      options: {
+        data: {
+          full_name: name.trim()
         }
       }
-    } catch (e) {
-      console.error("Failed to load user session", e)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
+    })
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    const usersDb = getUsersDB()
-    const credsDb = getCredsDB()
-    const normalizedEmail = email.toLowerCase().trim()
+    if (error) throw new Error(error.message)
 
-    const account = usersDb[normalizedEmail]
-    if (!account) throw new Error("No account found with this email. Please register first.")
+    if (!data.session) return { success: true, needsConfirmation: true }
 
-    const hashedInput = await hashPassword(password)
-    const storedHash = credsDb[normalizedEmail]
-
-    if (storedHash && storedHash !== hashedInput) throw new Error("Invalid password. Please try again.")
-
-    localStorage.setItem(SESSION_KEY, normalizedEmail)
-    setUser(account)
-    return true
+    return { success: true, needsConfirmation: false }
   }
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    const usersDb = getUsersDB()
-    const credsDb = getCredsDB()
-    const normalizedEmail = email.toLowerCase().trim()
-
-    if (usersDb[normalizedEmail]) throw new Error("An account with this email already exists. Please sign in instead.")
-
-    const newAccount: UserAccount = {
-      id: "usr_" + Math.random().toString(36).substring(2, 9),
-      name: name.trim(),
-      email: normalizedEmail,
-      role: "member",
-      passes: [],
-    }
-
-    usersDb[normalizedEmail] = newAccount
-    credsDb[normalizedEmail] = await hashPassword(password)
-    saveUsersDB(usersDb)
-    saveCredsDB(credsDb)
-
-    localStorage.setItem(SESSION_KEY, normalizedEmail)
-    setUser(newAccount)
-    return true
-  }
-
-  const logout = () => {
-    localStorage.removeItem(SESSION_KEY)
+  const logout = async () => {
+    await supabase.auth.signOut()
     setUser(null)
   }
 
-  const claimPass = (passType: PassType, formData: Record<string, any>): ClaimedPass | null => {
+  const claimPass = async (
+    passType: PassType,
+    formData: Record<string, any>
+  ): Promise<ClaimedPass | null> => {
     if (!user) return null
 
+    const ticketCode = `OPFBEX-2026-${passType.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`
+
+    const initialStatus: PassStatus = passType === "visitor" ? "active" : "pending_verification"
+
+    const { data, error } = await supabase
+      .from("passes")
+      .insert({
+        user_id: user.id,
+        pass_type: passType,
+        ticket_code: ticketCode,
+        status: initialStatus,
+        form_data: formData
+      })
+      .select("id, pass_type, ticket_code, status, form_data, created_at")
+      .single()
+
+    if (error || !data) {
+      console.error("Failed to insert pass: ", error)
+      return null
+    }
+
     const newPass: ClaimedPass = {
-      id: "pass_" + Math.random().toString(36).substring(2, 9),
-      passType,
-      claimedAt: new Date().toISOString(),
-      ticketCode: `OPFBEX-2026-${passType.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`,
-      status: passType === "visitor" ? "active" : "pending_verification",
-      formData,
+      id: data.id,
+      passType: data.pass_type as PassType,
+      ticketCode: data.ticket_code,
+      status: data.status as PassStatus,
+      formData: data.form_data,
+      claimedAt: data.created_at
     }
 
-    const updatedUser: UserAccount = {
-      ...user,
-      passes: [newPass, ...user.passes],
-    }
-
-    const db = getUsersDB()
-    db[user.email.toLowerCase()] = updatedUser
-    saveUsersDB(db)
-    setUser(updatedUser)
-
+    setUser((prev) => (prev ? { ...prev, passes: [newPass, ...prev.passes] } : null))
     return newPass
   }
 
-  const updatePass = (passId: string, updatedFormData: Record<string, any>): boolean => {
+  const updatePass = async (
+    passId: string,
+    updatedFormData: Record<string, any>
+  ): Promise<boolean> => {
     if (!user) return false
 
-    const updatedPasses = user.passes.map((p) =>
-      p.id === passId ? { ...p, formData: updatedFormData } : p
-    )
+    const { error } = await supabase
+      .from("passes")
+      .update({
+        form_data: updatedFormData,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", passId)
+      .eq("user_id", user.id)
 
-    const updatedUser: UserAccount = {
-      ...user,
-      passes: updatedPasses,
+    if (error) {
+      console.error("Failed to update pass: ", error)
+      return false
     }
 
-    const db = getUsersDB()
-    db[user.email.toLowerCase()] = updatedUser
-    saveUsersDB(db)
-    setUser(updatedUser)
+    setUser((prev) => {
+      if (!prev) return null
+      return {
+        ...prev,
+        passes: prev.passes.map((p) => (p.id === passId ? { ...p, formData: updatedFormData } : p))
+      }
+    })
 
     return true
   }
 
-  const cancelPass = (passId: string): boolean => {
+  const cancelPass = async (passId: string): Promise<boolean> => {
     if (!user) return false
 
-    const updatedPasses = user.passes.map((p) =>
-      p.id === passId ? { ...p, status: "cancelled" as const } : p
-    )
+    const { error } = await supabase
+      .from("passes")
+      .update({
+        status: "cancelled",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", passId)
+      .eq("user_id", user.id)
 
-    const updatedUser: UserAccount = {
-      ...user,
-      passes: updatedPasses,
+    if (error) {
+      console.error("Failed to cancel pass: ", error)
+      return false
     }
 
-    const db = getUsersDB()
-    db[user.email.toLowerCase()] = updatedUser
-    saveUsersDB(db)
-    setUser(updatedUser)
+    setUser((prev) => {
+      if (!prev) return null
+      return {
+        ...prev,
+        passes: prev.passes.map((p) => p.id === passId ? { ...p, status: "cancelled" as PassStatus } : p)
+      }
+    })
 
     return true
   }
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, login, register, logout, claimPass, updatePass, cancelPass }}
+      value={{
+        user,
+        isLoading,
+        login,
+        register,
+        logout,
+        claimPass,
+        updatePass,
+        cancelPass,
+        refreshUserPasses
+      }}
     >
       {children}
     </AuthContext.Provider>

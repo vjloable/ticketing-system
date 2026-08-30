@@ -3,7 +3,7 @@
 import { use } from "react"
 import { useState } from "react"
 import Link from "next/link"
-import { PassType } from "@/lib/pass-types"
+import { PassType, ClaimedPass } from "@/lib/pass-types"
 import { useAuth } from "@/lib/auth-context"
 import { VisitorForm } from "@/components/forms/VisitorForm"
 import { ExhibitorForm } from "@/components/forms/ExhibitorForm"
@@ -43,12 +43,27 @@ export default function RegisterPassPage({
   const meta = passMeta[passType] || passMeta.visitor
 
   const { user, isLoading, claimPass } = useAuth()
-  const [successPass, setSuccessPass] = useState<any>(null)
+  const [successPass, setSuccessPass] = useState<ClaimedPass | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
-  const handleFormSubmit = (formData: any) => {
+  const handleFormSubmit = async (formData: any) => {
     if (!user) return
-    const claimed = claimPass(passType, formData)
-    setSuccessPass(claimed)
+    setIsSubmitting(true)
+    setSubmitError(null)
+
+    try {
+      const claimed = await claimPass(passType, formData)
+      if (claimed) {
+        setSuccessPass(claimed)
+      } else {
+        setSubmitError("Failed to register pass. Please try again.")
+      }
+    } catch (err) {
+      setSubmitError("An error occurred while saving your registration to Supabase.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (isLoading) {
@@ -79,13 +94,13 @@ export default function RegisterPassPage({
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href={`/login?redirect=/register/${passType}`}
-              className="border border-marigold bg-marigold px-8 py-3 text-xs font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-marigold"
+              className="border border-marigold bg-marigold px-8 py-3 text-xs font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-marigold cursor-pointer"
             >
               Sign In / Register Account
             </Link>
             <Link
               href="/"
-              className="border border-white/20 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:border-white"
+              className="border border-white/20 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:border-white cursor-pointer"
             >
               Back to Home
             </Link>
@@ -104,7 +119,7 @@ export default function RegisterPassPage({
           <div className="mt-4 eyebrow text-basil">Registration Successful</div>
           <h1 className="mt-2 font-display text-3xl font-black">You are Registered!</h1>
           <p className="mt-3 text-sm text-white/70">
-            Your {meta.badge} has been attached to your member account.
+            Your {meta.badge} has been secured and attached to your account.
           </p>
 
           <div className="my-8 border border-white/15 bg-grape-950 p-6 text-left">
@@ -116,6 +131,7 @@ export default function RegisterPassPage({
             </div>
             <div className="mt-3 text-xs text-white/60 space-y-1">
               <p><span className="text-white/40">Type:</span> {meta.badge}</p>
+              <p><span className="text-white/40">Status:</span> <span className="uppercase text-basil font-semibold">{successPass.status}</span></p>
               <p><span className="text-white/40">Holder:</span> {user.name}</p>
               <p><span className="text-white/40">Date:</span> Sept 19–20, 2026 · SMX Clark</p>
             </div>
@@ -124,13 +140,13 @@ export default function RegisterPassPage({
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
               href="/passes"
-              className="flex-1 border border-marigold bg-marigold py-3 text-center text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-marigold"
+              className="flex-1 border border-marigold bg-marigold py-3 text-center text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-marigold cursor-pointer"
             >
               View My Passes
             </Link>
             <Link
               href="/"
-              className="flex-1 border border-white/20 py-3 text-center text-xs font-bold uppercase tracking-wider text-white hover:border-white"
+              className="flex-1 border border-white/20 py-3 text-center text-xs font-bold uppercase tracking-wider text-white hover:border-white cursor-pointer"
             >
               Return to Home
             </Link>
@@ -156,23 +172,35 @@ export default function RegisterPassPage({
           </span>
         </div>
 
-        <div className="mt-8">
+        {submitError && (
+          <div className="mt-6 border border-chili/40 bg-chili/10 p-3 text-xs text-chili">
+            {submitError}
+          </div>
+        )}
+
+        <div className="mt-8 relative">
+          {isSubmitting && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-grape-950/75 backdrop-blur-[2px]">
+              <p className="eyebrow text-marigold animate-pulse">Securing pass in Supabase...</p>
+            </div>
+          )}
+
           {passType === "visitor" && (
             <VisitorForm
               onSubmit={handleFormSubmit}
-              initialData={{ name: user.name, email: user.email }}
+              initialData={{ fullName: user.name, email: user.email }}
             />
           )}
           {passType === "exhibitor" && (
             <ExhibitorForm
               onSubmit={handleFormSubmit}
-              initialData={{ name: user.name, email: user.email }}
+              initialData={{ contactPerson: user.name, email: user.email }}
             />
           )}
           {passType === "sponsor" && (
             <SponsorForm
               onSubmit={handleFormSubmit}
-              initialData={{ name: user.name, email: user.email }}
+              initialData={{ contactPerson: user.name, email: user.email }}
             />
           )}
         </div>
