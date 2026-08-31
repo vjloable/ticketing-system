@@ -9,6 +9,7 @@ interface AdminPassDetailModalProps {
   onClose: () => void
   onApprove: (passId: string) => Promise<void>
   onManualCheckIn: (passId: string) => Promise<void>
+  onRevertCheckIn?: (passId: string) => Promise<void>
 }
 
 export function AdminPassDetailModal({
@@ -16,10 +17,12 @@ export function AdminPassDetailModal({
   onClose,
   onApprove,
   onManualCheckIn,
+  onRevertCheckIn,
 }: AdminPassDetailModalProps) {
   const data = pass.formData || {}
   const isPending = pass.status === "pending_verification"
   const isActive = pass.status === "active"
+  const isCheckedIn = pass.status === "checked_in"
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
@@ -97,7 +100,7 @@ export function AdminPassDetailModal({
 
         {/* Modal Actions */}
         <div className="mt-6 flex flex-wrap justify-between items-center gap-3 border-t border-white/10 pt-4">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {isPending && (
               <button
                 onClick={async () => {
@@ -119,6 +122,18 @@ export function AdminPassDetailModal({
                 className="border border-lime bg-lime px-4 py-2 text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-lime transition-colors cursor-pointer"
               >
                 ✓ Manual Check-In
+              </button>
+            )}
+
+            {isCheckedIn && onRevertCheckIn && (
+              <button
+                onClick={async () => {
+                  await onRevertCheckIn(pass.id)
+                  onClose()
+                }}
+                className="border border-marigold bg-marigold/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-marigold hover:bg-marigold hover:text-grape-950 transition-colors cursor-pointer"
+              >
+                ↺ Undo Check-In (Mark Active)
               </button>
             )}
 

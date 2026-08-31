@@ -140,6 +140,26 @@ export default function AdminDashboardPage() {
     }
   }
 
+  // Revert / Undo Check-In Handler
+  const handleRevertCheckIn = async (passId: string) => {
+    const { error } = await supabase
+      .from("passes")
+      .update({
+        status: "active",
+        checked_in_at: null,
+        checked_in_by: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", passId)
+
+    if (error) {
+      showToast(`Failed to undo check-in: ${error.message}`, "error")
+    } else {
+      showToast("Check-in reverted! Pass is active again.", "success")
+      fetchPasses()
+    }
+  }
+
   // Filter Logic
   const filteredPasses = passes.filter((p) => {
     const q = searchQuery.toLowerCase().trim()
@@ -183,12 +203,6 @@ export default function AdminDashboardPage() {
           >
             🔄 Refresh
           </button>
-          <Link
-            href="/admin/scan"
-            className="border border-marigold bg-marigold px-4 py-2 text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-marigold transition-colors"
-          >
-            📷 Launch Scanner
-          </Link>
         </div>
       </div>
 
@@ -372,6 +386,16 @@ export default function AdminDashboardPage() {
                         </button>
                       )}
 
+                      {p.status === "checked_in" && (
+                        <button
+                          onClick={() => handleRevertCheckIn(p.id)}
+                          className="border border-marigold/40 bg-marigold/10 px-2 py-1 text-[10px] font-bold uppercase text-marigold hover:bg-marigold hover:text-grape-950 transition-colors cursor-pointer"
+                          title="Undo / Revert Check-In"
+                        >
+                          Undo
+                        </button>
+                      )}
+
                       <button
                         onClick={() => setInspectingPass(p)}
                         className="border border-white/20 bg-white/5 px-2 py-1 text-[10px] font-semibold uppercase text-white hover:bg-white/15 cursor-pointer"
@@ -432,6 +456,7 @@ export default function AdminDashboardPage() {
           onClose={() => setInspectingPass(null)}
           onApprove={handleApproveCommercial}
           onManualCheckIn={handleManualCheckIn}
+          onRevertCheckIn={handleRevertCheckIn}
         />
       )}
     </div>

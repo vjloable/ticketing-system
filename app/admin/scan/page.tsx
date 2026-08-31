@@ -199,6 +199,27 @@ export default function AdminScanPage() {
     }
   }
 
+  const handleUndoCheckIn = async (passId: string) => {
+    setIsProcessing(true)
+    const { error } = await supabase
+      .from("passes")
+      .update({
+        status: "active",
+        checked_in_at: null,
+        checked_in_by: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", passId)
+
+    setIsProcessing(false)
+
+    if (error) {
+      alert("Failed to undo check-in: " + error.message)
+    } else {
+      setScanResult(null)
+    }
+  }
+
   return (
     <div className="py-6 px-4 sm:px-6 max-w-4xl mx-auto min-h-[85vh]">
       {/* Top Header Bar */}
@@ -288,6 +309,7 @@ export default function AdminScanPage() {
               result={scanResult}
               onDismiss={() => setScanResult(null)}
               onApprovePending={handleApprovePending}
+              onUndoCheckIn={handleUndoCheckIn}
             />
           ) : (
             <div className="border border-white/12 bg-grape-900/60 p-8 text-center flex flex-col items-center justify-center min-h-55">

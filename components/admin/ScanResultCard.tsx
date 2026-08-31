@@ -6,9 +6,15 @@ interface ScanResultCardProps {
   result: CheckInScanResult
   onDismiss: () => void
   onApprovePending?: (passId: string) => void
+  onUndoCheckIn?: (passId: string) => void
 }
 
-export function ScanResultCard({ result, onDismiss, onApprovePending }: ScanResultCardProps) {
+export function ScanResultCard({
+  result,
+  onDismiss,
+  onApprovePending,
+  onUndoCheckIn,
+}: ScanResultCardProps) {
   const { status, message, pass, timestamp } = result
   const data = pass?.formData || {}
   const attendeeName =
@@ -27,7 +33,7 @@ export function ScanResultCard({ result, onDismiss, onApprovePending }: ScanResu
                 Check-In Successful
               </span>
             </div>
-            <button onClick={onDismiss} className="text-white/60 hover:text-white text-sm">
+            <button onClick={onDismiss} className="text-white/60 hover:text-white text-sm cursor-pointer">
               ✕
             </button>
           </div>
@@ -51,6 +57,17 @@ export function ScanResultCard({ result, onDismiss, onApprovePending }: ScanResu
               <span>Physical Badge / Wristband Issued</span>
               <span>{timestamp || "Just Now"}</span>
             </div>
+
+            {onUndoCheckIn && pass && (
+              <div className="mt-3 border-t border-basil/20 pt-2 text-right">
+                <button
+                  onClick={() => onUndoCheckIn(pass.id)}
+                  className="text-[11px] text-white/60 hover:text-marigold underline cursor-pointer"
+                >
+                  Accidental scan? Click to undo check-in
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )
@@ -67,7 +84,7 @@ export function ScanResultCard({ result, onDismiss, onApprovePending }: ScanResu
                 Already Checked In
               </span>
             </div>
-            <button onClick={onDismiss} className="text-white/60 hover:text-white text-sm">
+            <button onClick={onDismiss} className="text-white/60 hover:text-white text-sm cursor-pointer">
               ✕
             </button>
           </div>
@@ -85,6 +102,15 @@ export function ScanResultCard({ result, onDismiss, onApprovePending }: ScanResu
                 </p>
               )}
             </div>
+
+            {onUndoCheckIn && pass && (
+              <button
+                onClick={() => onUndoCheckIn(pass.id)}
+                className="mt-3 w-full border border-marigold bg-marigold/20 py-2 text-xs font-bold uppercase tracking-wider text-marigold hover:bg-marigold hover:text-grape-950 transition-colors cursor-pointer"
+              >
+                ↺ Undo Check-In (Mark Active)
+              </button>
+            )}
           </div>
         </div>
       )
@@ -101,7 +127,7 @@ export function ScanResultCard({ result, onDismiss, onApprovePending }: ScanResu
                 Pending Commercial Approval
               </span>
             </div>
-            <button onClick={onDismiss} className="text-white/60 hover:text-white text-sm">
+            <button onClick={onDismiss} className="text-white/60 hover:text-white text-sm cursor-pointer">
               ✕
             </button>
           </div>
@@ -141,7 +167,7 @@ export function ScanResultCard({ result, onDismiss, onApprovePending }: ScanResu
                 {status === "cancelled" ? "Pass Cancelled" : "Invalid Ticket Code"}
               </span>
             </div>
-            <button onClick={onDismiss} className="text-white/60 hover:text-white text-sm">
+            <button onClick={onDismiss} className="text-white/60 hover:text-white text-sm cursor-pointer">
               ✕
             </button>
           </div>
