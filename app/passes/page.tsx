@@ -5,14 +5,14 @@ import Link from "next/link"
 import { useAuth } from "@/lib/auth-context"
 import { EVENT_CONFIG } from "@/lib/event-config"
 import { ClaimedPass } from "@/lib/pass-types"
-import { canEditPass, canCancelPass } from "@/lib/form-constants"
+import { canEditPass, canCancelPass, canReclaimPass } from "@/lib/form-constants"
 import { PassStatusBadge } from "@/components/passes/PassStatusBadge"
 import { PassDetailsModal } from "@/components/passes/PassDetailsModal"
 import { PassEditModal } from "@/components/passes/PassEditModal"
 import { PassCancelModal } from "@/components/passes/PassCancelModal"
 
 export default function MyPassesPage() {
-  const { user, isLoading, updatePass, cancelPass } = useAuth()
+  const { user, isLoading, updatePass, cancelPass, reclaimPass } = useAuth()
   const [viewingPass, setViewingPass] = useState<ClaimedPass | null>(null)
   const [editingPass, setEditingPass] = useState<ClaimedPass | null>(null)
   const [cancellingPass, setCancellingPass] = useState<ClaimedPass | null>(null)
@@ -42,6 +42,16 @@ export default function MyPassesPage() {
       showFeedback(`Pass (${cancellingPass.ticketCode}) has been cancelled.`, "info")
     } else {
       showFeedback("Failed to cancel pass. Please try again.", "error")
+    }
+  }
+
+  const handleReclaimPass = async (pass: ClaimedPass) => {
+    const success = await reclaimPass(pass.id)
+
+    if (success) {
+      showFeedback(`Pass (${pass.ticketCode}) has been reclaimed.`, "success")
+    } else {
+      showFeedback("Failed to reclaim pass. Please try again.", "error")
     }
   }
 
@@ -141,6 +151,7 @@ export default function MyPassesPage() {
               const isCancelled = pass.status === "cancelled"
               const editPolicy = canEditPass(pass)
               const cancelPolicy = canCancelPass(pass)
+              const reclaimPolicy = canReclaimPass(pass)
 
               return (
                 <div
@@ -225,6 +236,15 @@ export default function MyPassesPage() {
                           title="Cancel pass"
                         >
                           Cancel
+                        </button>
+                      )}
+
+                      {isCancelled && reclaimPolicy.allowed && (
+                        <button
+                          onClick={() => handleReclaimPass(pass)}
+                          className="border border-basil/50 bg-basil/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-basil hover:bg-basil hover:text-grape-950 transition-colors cursor-pointer"
+                        >
+                          ↺ Reclaim Pass
                         </button>
                       )}
                     </div>

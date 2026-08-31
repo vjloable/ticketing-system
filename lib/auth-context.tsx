@@ -18,6 +18,7 @@ interface AuthContextType {
   claimPass: (passType: PassType, formData: Record<string, any>) => Promise<ClaimedPass | null>
   updatePass: (passId: string, updatedFormData: Record<string, any>) => Promise<boolean>
   cancelPass: (passId: string) => Promise<boolean>
+  reclaimPass: (passId: string) => Promise<boolean>
   refreshUserPasses: () => Promise<void>
 }
 
@@ -155,17 +156,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     formData: Record<string, any>
   ): Promise<ClaimedPass | null> => {
     if (!user) return null
-
+    
+    // Fetch Event ID
     const { data: eventData } = await supabase
       .from("events")
       .select("id")
       .eq("slug", EVENT_CONFIG.slug)
       .single()
-
-    const ticketCode = `${EVENT_CONFIG.codePrefix.toUpperCase()}-${passType.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`
-
+    
+    // Generate atomic sequential ticket code (e.g. OPFBEX-2026-VIS-0001)
+    const { data: generatedCode, error: _codeError } = await supabase.rpc("next_ticket_code", {
+      p_event_slug: EVENT_CONFIG.slug,
+      p_pass_type: passType,
+    })
+    
+    // Fallback if RPC fails for any reason
+    const ticketCode = generatedCode || `${EVENT_CONFIG.codePrefix.toUpperCase()}-${passType.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`
     const initialStatus: PassStatus = passType === "visitor" ? "active" : "pending_verification"
-
     const { data, error } = await supabase
       .from("passes")
       .insert({
@@ -178,12 +185,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       .select("id, event_id, pass_type, ticket_code, status, form_data, created_at")
       .single()
-
+    
     if (error || !data) {
       console.error("Failed to insert pass: ", error)
       return null
     }
-
+    
     const newPass: ClaimedPass = {
       id: data.id,
       eventId: data.event_id,
@@ -193,9 +200,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       formData: data.form_data,
       claimedAt: data.created_at
     }
-
+    
     setUser((prev) => (prev ? { ...prev, passes: [newPass, ...prev.passes] } : null))
     return newPass
+  }
+  
+  // 3. New reclaimPass function:
+  const reclaimPass = async (passId: string): Promise<boolean> => {
+    if (!user) return false
+
+    const targetPass = user.passes.find((p) => p.id === passId)
+    if (!targetPass) return false
+    
+    // Restore to active (or pending_verification for commercial tiers)
+    const restoredStatus: PassStatus = targetPass.passType === "visitor" ? "active" : "pending_verification"
+    const { error } = await supabase
+      .from("passes")
+      .update({
+        status: restoredStatus,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", passId)
+      .eq("user_id", user.id)
+    
+    if (error) {
+      console.error("Failed to reclaim pass: ", error)
+      return false
+    }
+    
+    setUser((prev) => {
+      if (!prev) return null
+      return {
+        ...prev,
+        passes: prev.passes.map((p) =>
+          p.id === passId ? { ...p, status: restoredStatus } : p
+        ),
+      }
+    })
+    
+    return true
   }
 
   const updatePass = async (
@@ -268,6 +311,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         claimPass,
         updatePass,
         cancelPass,
+        reclaimPass,
         refreshUserPasses
       }}
     >

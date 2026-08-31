@@ -243,3 +243,13 @@ export function canCancelPass(pass: ClaimedPass): { allowed: boolean; reason?: s
 
   return { allowed: true }
 }
+
+// Policy: Can a cancelled pass be reclaimed / reactivated?
+export function canReclaimPass(pass: ClaimedPass): { allowed: boolean; reason?: string } {
+  if (pass.status !== "cancelled") return { allowed: false, reason: "Only cancelled passes can be reclaimed." }
+
+  const registrationStatus = isRegistrationOpen(pass.passType)
+  if (!registrationStatus.isOpen) return { allowed: false, reason: `Cannot reclaim pass: Registration for ${pass.passType} passes is closed.` }
+
+  return { allowed: true }
+}
