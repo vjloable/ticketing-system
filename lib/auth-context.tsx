@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react"
 import { UserAccount, PassType, ClaimedPass, PassStatus, UserRole } from "./pass-types"
 import { createClient } from "./supabase/client"
+import { EVENT_CONFIG } from "./event-config"
 
 interface AuthContextType {
   user: UserAccount | null
@@ -43,12 +44,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // 2. Fetch Passes
       const { data: passesData } = await supabase
         .from("passes")
-        .select("id, pass_type, ticket_code, status, form_data, created_at")
+        .select("id, event_id, pass_type, ticket_code, status, form_data, created_at")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
 
       const mappedPasses: ClaimedPass[] = (passesData || []).map((p) => ({
         id: p.id,
+        eventId: p.event_id,
         passType: p.pass_type as PassType,
         ticketCode: p.ticket_code,
         status: p.status as PassStatus,
@@ -154,7 +156,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   ): Promise<ClaimedPass | null> => {
     if (!user) return null
 
-    const ticketCode = `OPFBEX-2026-${passType.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`
+    const { data: eventData } = await supabase
+      .from("events")
+      .select("id")
+      .eq("slug", EVENT_CONFIG.slug)
+      .single()
+
+    const ticketCode = `${EVENT_CONFIG.codePrefix.toUpperCase()}-${passType.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`
 
     const initialStatus: PassStatus = passType === "visitor" ? "active" : "pending_verification"
 
@@ -162,12 +170,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .from("passes")
       .insert({
         user_id: user.id,
+        event_id: eventData?.id || null,
         pass_type: passType,
         ticket_code: ticketCode,
         status: initialStatus,
         form_data: formData
       })
-      .select("id, pass_type, ticket_code, status, form_data, created_at")
+      .select("id, event_id, pass_type, ticket_code, status, form_data, created_at")
       .single()
 
     if (error || !data) {
@@ -177,6 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const newPass: ClaimedPass = {
       id: data.id,
+      eventId: data.event_id,
       passType: data.pass_type as PassType,
       ticketCode: data.ticket_code,
       status: data.status as PassStatus,

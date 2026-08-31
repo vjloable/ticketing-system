@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useAuth } from "@/lib/auth-context"
+import { EVENT_CONFIG } from "@/lib/event-config"
 import { ClaimedPass } from "@/lib/pass-types"
 import { canEditPass, canCancelPass } from "@/lib/form-constants"
 import { PassStatusBadge } from "@/components/passes/PassStatusBadge"
@@ -111,7 +112,7 @@ export default function MyPassesPage() {
           <div className="mt-12 border border-white/12 bg-grape-900 p-12 text-center">
             <p className="text-lg font-medium text-white/80">No passes registered yet.</p>
             <p className="mt-2 text-sm text-white/50">
-              Choose a pass type to get started for OPFBEX 2026.
+              Choose a pass type to get started for {EVENT_CONFIG.shortName}.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link
@@ -229,8 +230,8 @@ export default function MyPassesPage() {
                     </div>
 
                     <div className="border-t border-white/10 pt-3 text-[11px] text-white/40 flex justify-between">
-                      <span>SMX Clark, Pampanga</span>
-                      <span>Sept 19–20, 2026</span>
+                      <span>{EVENT_CONFIG.venue}</span>
+                      <span>{EVENT_CONFIG.dates}</span>
                     </div>
                   </div>
                 </div>

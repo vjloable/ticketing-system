@@ -1,6 +1,7 @@
 "use client"
 
 import { ClaimedPass } from "@/lib/pass-types"
+import { EVENT_CONFIG } from "@/lib/event-config"
 import { PassQRCode } from "./PassQRCode"
 import { PassStatusBadge } from "./PassStatusBadge"
 
@@ -29,17 +30,16 @@ export function PassPrintBadge({ pass, userName }: PassPrintBadgeProps) {
       {/* TOP HEADER: Event Branding & Lanyard Slot Mark */}
       <div>
         <div className="flex justify-center pb-2">
-          {/* Lanyard punch guide mark */}
           <div className="h-2 w-12 rounded-full border border-white/30 bg-white/10 print:border-black/40 print:bg-black/10" />
         </div>
 
         <div className="flex items-center justify-between border-b border-white/15 print:border-black pb-3 mt-2">
           <div>
             <span className="font-display text-lg font-black tracking-tight text-marigold print:text-black">
-              OPFBEX 2026
+              {EVENT_CONFIG.shortName}
             </span>
             <p className="text-[9px] uppercase tracking-wider text-white/60 print:text-black/70">
-              One Pampanga Food & Beverage Expo
+              {EVENT_CONFIG.name}
             </p>
           </div>
           <div className="text-right">
@@ -90,8 +90,8 @@ export function PassPrintBadge({ pass, userName }: PassPrintBadgeProps) {
       {/* BOTTOM: VENUE, DATES & GATE INSTRUCTIONS */}
       <div className="border-t border-white/15 print:border-black pt-3 text-[10px] text-white/70 print:text-black">
         <div className="flex justify-between font-semibold">
-          <span>SMX Convention Center Clark</span>
-          <span>Sept 19–20, 2026</span>
+          <span>{EVENT_CONFIG.venue}</span>
+          <span>{EVENT_CONFIG.dates}</span>
         </div>
         <div className="mt-1 flex justify-between text-[9px] text-white/40 print:text-black/60">
           <span>Present QR at registration desk</span>

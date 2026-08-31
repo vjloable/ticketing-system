@@ -2,8 +2,18 @@ export type PassType = "visitor" | "exhibitor" | "sponsor"
 export type UserRole = "member" | "admin"
 export type PassStatus = "active" | "cancelled" | "pending_verification" | "checked_in"
 
+export interface EventItem {
+  id: string
+  slug: string
+  name: string
+  dates: string
+  venue: string
+  status: "active" | "archived" | "upcoming"
+}
+
 export interface ClaimedPass {
   id: string
+  eventId?: string
   passType: PassType
   claimedAt: string
   ticketCode: string

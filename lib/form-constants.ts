@@ -1,12 +1,7 @@
+import { EVENT_CONFIG } from "./event-config"
 import { ClaimedPass, PassType } from "./pass-types"
 
-export const BANK_PAYMENT_DETAILS = {
-  bankName: "Security Bank",
-  accountType: "Current",
-  accountName: "Asuncion Family Ventures Inc.",
-  accountNumber: "0000071667602",
-  venueLayoutUrl: "https://canva.link/59jgmeo05db",
-}
+export const BANK_PAYMENT_DETAILS = EVENT_CONFIG.bankDetails
 
 export const VISITOR_AGE_OPTIONS = [
   "Below 13 years old",
@@ -185,19 +180,18 @@ export const SPONSORSHIP_TIERS = [
 
 // Cutoff Dates
 // Commercial (Exhibitor / Sponsor): September 12, 2026 (7 days before event)
-export const COMMERCIAL_REGISTRATION_CUTOFF = new Date("2026-09-12T23:59:59+08:00")
+export const COMMERCIAL_REGISTRATION_CUTOFF = EVENT_CONFIG.deadlines.commercialCutoff
 // Visitor (Walk-in / Same Day): Open through expo closing on September 20, 2026 at 6:00 PM PHT
-export const VISITOR_REGISTRATION_CUTOFF = new Date("2026-09-20T18:00:00+08:00")
-
+export const VISITOR_REGISTRATION_CUTOFF = EVENT_CONFIG.deadlines.visitorCutoff
 // Pass Edit Cutoff: September 12, 2026 (11:59 PM PHT)
-export const EDIT_CUTOFF_DATE = new Date("2026-09-12T23:59:59+08:00")
+export const EDIT_CUTOFF_DATE = EVENT_CONFIG.deadlines.editCutoff
 
 export const POLICY_RULES = {
-  cutoffDateFormatted: "September 12, 2026 (11:59 PM PHT)",
-  visitorCutoffFormatted: "September 20, 2026 (6:00 PM PHT)",
-  commercialCutoffFormatted: "September 12, 2026 (11:59 PM PHT)",
-  supportEmail: "opfbexofficial@gmail.com",
-  supportPhone: "+63 917 521 1106",
+  cutoffDateFormatted: EVENT_CONFIG.deadlines.commercialCutoffFormatted,
+  visitorCutoffFormatted: EVENT_CONFIG.deadlines.visitorCutoffFormatted,
+  commercialCutoffFormatted: EVENT_CONFIG.deadlines.commercialCutoffFormatted,
+  supportEmail: EVENT_CONFIG.support.email,
+  supportPhone: EVENT_CONFIG.support.phone,
 }
 
 // Check if registration is open for a specific pass type
