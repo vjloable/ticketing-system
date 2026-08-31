@@ -36,11 +36,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   ) => {
     try {
       // 1. Fetch Profile
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("id, full_name, email, role")
         .eq("id", userId)
-        .single()
+        .maybeSingle()
+
+      if (profileError) {
+        console.error("[Auth] Error fetching user profile:", profileError)
+      }
 
       // 2. Fetch Passes
       const { data: passesData } = await supabase

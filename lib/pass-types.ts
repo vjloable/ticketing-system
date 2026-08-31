@@ -14,12 +14,14 @@ export interface EventItem {
 export interface ClaimedPass {
   id: string
   eventId?: string
+  userId?: string
   passType: PassType
   claimedAt: string
   ticketCode: string
   status: PassStatus
   formData: Record<string, any>
   checkedInAt?: string
+  checkedInBy?: string
 }
 
 export interface UserAccount {
@@ -28,6 +30,31 @@ export interface UserAccount {
   email: string
   role: UserRole
   passes: ClaimedPass[]
+}
+
+export interface AdminPassRecord {
+  id: string
+  eventId?: string
+  userId?: string
+  passType: PassType
+  ticketCode: string
+  status: PassStatus
+  formData: Record<string, any>
+  claimedAt: string
+  checkedInAt?: string
+  checkedInBy?: string
+  userProfile?: {
+    id?: string
+    fullName?: string
+    email?: string
+  }
+}
+
+export interface CheckInScanResult {
+  status: "success" | "already_checked_in" | "pending_verification" | "cancelled" | "not_found"
+  message: string
+  pass?: AdminPassRecord
+  timestamp?: string
 }
 
 export interface VisitorFormData {

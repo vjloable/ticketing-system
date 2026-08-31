@@ -65,6 +65,15 @@ export function SiteHeader() {
                       {user.role}
                     </span>
                   </div>
+                  {user.role === "admin" && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setUserDropdown(false)}
+                      className="block border-b border-white/10 px-4 py-2.5 text-xs font-bold text-marigold transition-colors hover:bg-white/10"
+                    >
+                      ⚡ Admin Dashboard
+                    </Link>
+                  )}
                   <Link
                     href="/passes"
                     onClick={() => setUserDropdown(false)}
@@ -129,6 +138,15 @@ export function SiteHeader() {
 
               {user ? (
                 <>
+                  {user.role === "admin" && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setOpen(false)}
+                      className="border border-marigold bg-marigold/10 py-2.5 text-center text-xs font-bold uppercase tracking-wider text-marigold"
+                    >
+                      ⚡ Admin Operations
+                    </Link>
+                  )}
                   <Link
                     href="/passes"
                     onClick={() => setOpen(false)}
