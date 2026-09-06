@@ -272,7 +272,7 @@ export function QRScanner({ onScan, onError, isScanningPaused = false }: QRScann
             🔄 Flip Camera
           </button>
         </div>
-      )}
+      )} 
 
       {/* Dim Mask with Clear Scan Box & Golden Reticle */}
       {cameraActive && !isScanningPaused && (
