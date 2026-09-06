@@ -13,6 +13,7 @@ export function QRScanner({ onScan, onError, isScanningPaused = false }: QRScann
   const [cameraActive, setCameraActive] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [facingMode, setFacingMode] = useState<"environment" | "user">("environment")
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(false)
 
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null)
   const isMountedRef = useRef(true)
@@ -21,12 +22,14 @@ export function QRScanner({ onScan, onError, isScanningPaused = false }: QRScann
   const scanLockTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const onScanRef = useRef(onScan)
+  const onErrorRef = useRef(onError)
   const isScanningPausedRef = useRef(isScanningPaused)
 
   useEffect(() => {
     onScanRef.current = onScan
+    onErrorRef.current = onError
     isScanningPausedRef.current = isScanningPaused
-  }, [onScan, isScanningPaused])
+  }, [onScan, onError, isScanningPaused])
 
   const containerId = "opfbex-qr-reader"
 
@@ -39,7 +42,7 @@ export function QRScanner({ onScan, onError, isScanningPaused = false }: QRScann
     if (navMedia && originalGetUserMedia) {
       navMedia.getUserMedia = async (constraints) => {
         const stream = await originalGetUserMedia(constraints)
-        
+
         // If user already navigated away before stream resolved, kill it immediately
         if (!isMountedRef.current) {
           stream.getTracks().forEach((track) => {
@@ -69,7 +72,7 @@ export function QRScanner({ onScan, onError, isScanningPaused = false }: QRScann
         try {
           track.stop()
           track.enabled = false
-        } catch {}
+        } catch { }
       })
       activeTracksRef.current = []
     }
@@ -80,54 +83,82 @@ export function QRScanner({ onScan, onError, isScanningPaused = false }: QRScann
     let qrCode: Html5Qrcode | null = null
 
     const initScanner = async () => {
+      // 1. Cleanup any previous instance
       if (html5QrCodeRef.current) {
         try {
           if (html5QrCodeRef.current.isScanning) {
             await html5QrCodeRef.current.stop()
           }
           html5QrCodeRef.current.clear()
-        } catch {}
+        } catch { }
         html5QrCodeRef.current = null
       }
 
       if (!isMountedRef.current) return
 
       try {
+        // 2. Query available camera hardware
+        const cameras = await Html5Qrcode.getCameras()
+        if (!cameras || cameras.length === 0) {
+          throw new Error("No camera hardware found on this system.")
+        }
+
+        if (!isMountedRef.current) return
+        setHasMultipleCameras(cameras.length > 1)
+
         qrCode = new Html5Qrcode(containerId)
         html5QrCodeRef.current = qrCode
 
-        await qrCode.start(
-          { facingMode },
-          {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0,
-          },
-          (decodedText) => {
-            if (isScanningPausedRef.current) return
+        const qrConfig = {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+        }
 
-            // Prevent duplicate scans within 2.5s
-            if (lastScannedCodeRef.current === decodedText) return
-            lastScannedCodeRef.current = decodedText
+        const handleScan = (decodedText: string) => {
+          if (isScanningPausedRef.current) return
 
-            if (scanLockTimeoutRef.current) clearTimeout(scanLockTimeoutRef.current)
-            scanLockTimeoutRef.current = setTimeout(() => {
-              lastScannedCodeRef.current = null
-            }, 2500)
+          // Prevent duplicate scans within 2.5s
+          if (lastScannedCodeRef.current === decodedText) return
+          lastScannedCodeRef.current = decodedText
 
-            if (onScanRef.current) {
-              onScanRef.current(decodedText)
-            }
-          },
-          () => {
-            // Normal scan frame tick
+          if (scanLockTimeoutRef.current) clearTimeout(scanLockTimeoutRef.current)
+          scanLockTimeoutRef.current = setTimeout(() => {
+            lastScannedCodeRef.current = null
+          }, 2500)
+
+          if (onScanRef.current) onScanRef.current(decodedText)
+        }
+
+        // 3. Smart Camera Selection:
+        // - Single camera (PC webcam / laptop): use its deviceId directly
+        // - Multiple cameras (phone): pick labeled camera, or fallback to native facingMode constraint
+        let cameraConfig: string | { facingMode: "environment" | "user" }
+
+        if (cameras.length === 1) {
+          cameraConfig = cameras[0].id
+        } else {
+          const backCamera = cameras.find((c) => /back|rear|environment/i.test(c.label))
+          const frontCamera = cameras.find((c) => /front|user/i.test(c.label))
+
+          if (facingMode === "environment" && backCamera) {
+            cameraConfig = backCamera.id
+          } else if (facingMode === "user" && frontCamera) {
+            cameraConfig = frontCamera.id
+          } else {
+            cameraConfig = { facingMode }
           }
-        )
+        }
+
+        if (!isMountedRef.current) return
+
+        // 4. Start scanner
+        await qrCode.start(cameraConfig, qrConfig, handleScan, () => {})
 
         if (!isMountedRef.current) {
           if (qrCode.isScanning) {
-            await qrCode.stop().catch(() => {})
-            try { qrCode.clear() } catch {}
+            await qrCode.stop().catch(() => { })
+            try { qrCode.clear() } catch { }
           }
           return
         }
@@ -138,7 +169,18 @@ export function QRScanner({ onScan, onError, isScanningPaused = false }: QRScann
         if (!isMountedRef.current) return
         console.error("[QRScanner] Failed to start camera:", err)
         setCameraActive(false)
-        setCameraError("Camera access unavailable. Please check browser permissions.")
+
+        let message = "Camera access unavailable. Please check browser permissions."
+        if (err?.name === "NotFoundError" || err?.message?.includes("hardware") || err?.message?.includes("No camera")) {
+          message = "No camera hardware detected. Please connect a webcam."
+        } else if (err?.name === "NotAllowedError" || err?.name === "PermissionDeniedError") {
+          message = "Camera permission denied. Please allow camera access in your browser."
+        } else if (err?.name === "NotReadableError" || err?.name === "TrackStartError") {
+          message = "Camera is currently in use by another application."
+        }
+
+        setCameraError(message)
+        if (onErrorRef.current) onErrorRef.current(message)
       }
     }
 
@@ -152,12 +194,12 @@ export function QRScanner({ onScan, onError, isScanningPaused = false }: QRScann
         html5QrCodeRef.current = null
         if (qr.isScanning) {
           qr.stop()
-            .catch(() => {})
+            .catch(() => { })
             .finally(() => {
-              try { qr.clear() } catch {}
+              try { qr.clear() } catch { }
             })
         } else {
-          try { qr.clear() } catch {}
+          try { qr.clear() } catch { }
         }
       }
     }
@@ -219,8 +261,8 @@ export function QRScanner({ onScan, onError, isScanningPaused = false }: QRScann
         </div>
       )}
 
-      {/* Flip Camera Button */}
-      {cameraActive && (
+      {/* Flip Camera Button: Only visible if the device actually has more than 1 camera */}
+      {cameraActive && hasMultipleCameras && (
         <div className="absolute top-3 right-3 flex items-center gap-2 z-20">
           <button
             onClick={toggleCamera}
