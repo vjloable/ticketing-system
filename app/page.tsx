@@ -50,7 +50,7 @@ function Hero() {
             {/* Visitor CTA Prioritized */}
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <Link
-                href="/register/visitor"
+                href="/register-visitor"
                 className="border border-marigold bg-marigold px-8 py-3.5 text-sm font-bold uppercase tracking-wider text-grape-950 transition-all hover:bg-transparent hover:text-marigold"
               >
                 Register as Visitor →
@@ -145,7 +145,7 @@ function PartnerPassesSection() {
             </div>
             <div className="mt-8">
               <Link
-                href="/register/exhibitor"
+                href="/register-exhibitor"
                 className="inline-block w-full border border-basil bg-basil py-3 text-center text-sm font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-basil"
               >
                 Register as Exhibitor →
@@ -180,7 +180,7 @@ function PartnerPassesSection() {
             </div>
             <div className="mt-8">
               <Link
-                href="/register/sponsor"
+                href="/register-sponsor"
                 className="inline-block w-full border border-tangerine bg-tangerine py-3 text-center text-sm font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-tangerine"
               >
                 Register as Sponsor →
@@ -331,7 +331,7 @@ function Exhibitors() {
       title="Brands you'll love"
       action={
         <Link
-          href="/register/exhibitor"
+          href="/register-exhibitor"
           className="eyebrow border border-white/25 px-5 py-2.5 text-white transition-colors hover:border-white"
         >
           Become an Exhibitor →
@@ -448,7 +448,7 @@ function CtaBanner() {
           Secure your visitor pass for Central Luzon&apos;s tastiest weekend of the year.
         </p>
         <Link
-          href="/register/visitor"
+          href="/register-visitor"
           className="mt-9 inline-block border border-grape-950 bg-grape-950 px-9 py-3.5 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-transparent hover:text-grape-950"
         >
           Register as Visitor →

@@ -72,7 +72,7 @@ export default function MyPassesPage() {
             Sign in to view and manage your registered event passes.
           </p>
           <Link
-            href="/login?redirect=/passes"
+            href="/signin?redirect=/passes"
             className="mt-6 inline-block border border-marigold bg-marigold px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-grape-950 cursor-pointer"
           >
             Sign In
@@ -95,7 +95,7 @@ export default function MyPassesPage() {
             </p>
           </div>
           <Link
-            href="/register/visitor"
+            href="/register-visitor"
             className="border border-marigold bg-marigold px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-marigold cursor-pointer"
           >
             + Claim Another Pass
@@ -126,19 +126,19 @@ export default function MyPassesPage() {
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link
-                href="/register/visitor"
+                href="/register-visitor"
                 className="border border-marigold bg-marigold px-5 py-2 text-xs font-bold uppercase tracking-wider text-grape-950 cursor-pointer"
               >
                 Visitor Pass
               </Link>
               <Link
-                href="/register/exhibitor"
+                href="/register-exhibitor"
                 className="border border-basil bg-basil px-5 py-2 text-xs font-bold uppercase tracking-wider text-grape-950 cursor-pointer"
               >
                 Exhibitor Pass
               </Link>
               <Link
-                href="/register/sponsor"
+                href="/register-sponsor"
                 className="border border-tangerine bg-tangerine px-5 py-2 text-xs font-bold uppercase tracking-wider text-grape-950 cursor-pointer"
               >
                 Sponsor Pass

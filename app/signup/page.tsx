@@ -1,23 +1,22 @@
 "use client"
 
 import { Suspense, useState, useEffect } from "react"
+import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 
-function LoginForm() {
-  const [isRegister, setIsRegister] = useState(true)
+function SignupForm() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [emailSentTo, setEmailSentTo] = useState<string | null>(null)
-  const { user, login, register } = useAuth()
+  const { user, register } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get("redirect") || "/"
 
-  // Automatically redirect if user is already logged in (or logs in from another tab)
   useEffect(() => {
     if (user) {
       router.push(redirect)
@@ -28,32 +27,32 @@ function LoginForm() {
     e.preventDefault()
     setError("")
 
-    if (!email || !password || (isRegister && !name)) {
+    if (!name.trim() || !email.trim() || !password) {
       setError("Please fill out all required fields.")
+      return
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long.")
       return
     }
 
     setIsSubmitting(true)
 
     try {
-      if (isRegister) {
-        const result = await register(name, email, password)
-        if (result.needsConfirmation) {
-          setEmailSentTo(email)
-          return
-        }
-      } else {
-        await login(email, password)
+      const result = await register(name.trim(), email.trim(), password)
+      if (result.needsConfirmation) {
+        setEmailSentTo(email.trim())
+        return
       }
       router.push(redirect)
     } catch (err: any) {
-      setError(err?.message || "An error occurred during authentication.")
+      setError(err?.message || "An error occurred during account creation.")
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // If user is already active, show a quick transitional state while redirecting
   if (user) {
     return (
       <div className="mx-auto max-w-md border border-white/12 bg-grape-900 p-8 sm:p-10 text-center">
@@ -63,7 +62,7 @@ function LoginForm() {
     )
   }
 
-  // Screen shown when confirmation email was dispatched
+  // Confirmation email dispatch screen
   if (emailSentTo) {
     return (
       <div className="mx-auto max-w-md border border-white/12 bg-grape-900 p-8 sm:p-10 text-center">
@@ -77,19 +76,16 @@ function LoginForm() {
           <span className="font-bold text-white">{emailSentTo}</span>.
         </p>
         <p className="mt-2 text-xs text-white/50">
-          Please click the link in your email to activate your OPFBEX 2026 account. Once confirmed, this page will automatically redirect you.
+          Please click the link in your email to activate your account.
         </p>
 
         <div className="mt-8 border-t border-white/10 pt-6">
-          <button
-            onClick={() => {
-              setEmailSentTo(null)
-              setIsRegister(false)
-            }}
-            className="w-full border border-marigold bg-marigold py-3 text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-marigold cursor-pointer"
+          <Link
+            href={`/signin${redirect !== "/" ? `?redirect=${encodeURIComponent(redirect)}` : ""}`}
+            className="block w-full border border-marigold bg-marigold py-3 text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-marigold"
           >
             Go to Sign In
-          </button>
+          </Link>
         </div>
       </div>
     )
@@ -97,14 +93,12 @@ function LoginForm() {
 
   return (
     <div className="mx-auto max-w-md border border-white/12 bg-grape-900 p-8 sm:p-10">
-      <div className="eyebrow text-marigold">Member Authentication</div>
+      <div className="eyebrow text-marigold">New Member</div>
       <h1 className="mt-3 font-display text-3xl font-extrabold tracking-tight">
-        {isRegister ? "Create Member Account" : "Sign In to Account"}
+        Create Member Account
       </h1>
       <p className="mt-2 text-sm text-white/60">
-        {isRegister
-          ? "Register to claim and access your event passes."
-          : "Sign in to manage your claimed passes."}
+        Register a free account to secure and manage your event passes.
       </p>
 
       {error && (
@@ -114,19 +108,17 @@ function LoginForm() {
       )}
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        {isRegister && (
-          <div>
-            <label className="eyebrow block text-white/50 mb-1.5">Full Name</label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Juan Dela Cruz"
-              className="w-full border border-white/15 bg-grape-950 px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-marigold focus:outline-none"
-            />
-          </div>
-        )}
+        <div>
+          <label className="eyebrow block text-white/50 mb-1.5">Full Name</label>
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Juan Dela Cruz"
+            className="w-full border border-white/15 bg-grape-950 px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-marigold focus:outline-none"
+          />
+        </div>
 
         <div>
           <label className="eyebrow block text-white/50 mb-1.5">Email Address</label>
@@ -148,7 +140,7 @@ function LoginForm() {
             minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
+            placeholder="At least 6 characters"
             className="w-full border border-white/15 bg-grape-950 px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-marigold focus:outline-none"
           />
         </div>
@@ -158,37 +150,30 @@ function LoginForm() {
           disabled={isSubmitting}
           className="mt-6 w-full border border-marigold bg-marigold py-3 text-sm font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-marigold cursor-pointer disabled:opacity-50"
         >
-          {isSubmitting
-            ? "Processing..."
-            : isRegister
-            ? "Create Account & Continue"
-            : "Sign In"}
+          {isSubmitting ? "Creating Account..." : "Create Account & Continue →"}
         </button>
       </form>
 
       <div className="mt-6 border-t border-white/10 pt-4 text-center">
-        <button
-          type="button"
-          onClick={() => {
-            setIsRegister(!isRegister)
-            setError("")
-          }}
-          className="text-xs text-white/60 hover:text-white cursor-pointer"
-        >
-          {isRegister
-            ? "Already have an account? Sign In"
-            : "Don't have an account? Register as Member"}
-        </button>
+        <p className="text-xs text-white/60">
+          Already have an account?{" "}
+          <Link
+            href={`/signin${redirect !== "/" ? `?redirect=${encodeURIComponent(redirect)}` : ""}`}
+            className="font-semibold text-marigold hover:underline"
+          >
+            Sign In here
+          </Link>
+        </p>
       </div>
     </div>
   )
 }
 
-export default function LoginPage() {
+export default function SignupPage() {
   return (
     <div className="bg-grape-950 py-16 px-5">
       <Suspense fallback={<div className="text-center text-white/50 eyebrow py-12">Loading...</div>}>
-        <LoginForm />
+        <SignupForm />
       </Suspense>
     </div>
   )

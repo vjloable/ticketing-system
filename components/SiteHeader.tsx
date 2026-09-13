@@ -39,7 +39,7 @@ export function SiteHeader() {
         {/* Top-Right Actions */}
         <div className="flex items-center gap-3">
           <Link
-            href="/register/visitor"
+            href="/register-visitor"
             className="hidden border border-marigold bg-marigold px-4 py-2 text-xs font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-marigold sm:inline-block"
           >
             Visitor Pass
@@ -95,10 +95,10 @@ export function SiteHeader() {
             </div>
           ) : (
             <Link
-              href="/login"
-              className="border border-white/25 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:border-white hover:bg-white/5"
+              href="/signin"
+              className="border border-white/25 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:border-white hover:bg-white/5"
             >
-              Sign In / Register
+              Sign In
             </Link>
           )}
 
@@ -129,7 +129,7 @@ export function SiteHeader() {
 
             <div className="flex flex-col gap-2 pt-4 pb-2">
               <Link
-                href="/register/visitor"
+                href="/register-visitor"
                 onClick={() => setOpen(false)}
                 className="border border-marigold bg-marigold py-2.5 text-center text-xs font-bold uppercase tracking-wider text-grape-950"
               >
@@ -166,7 +166,7 @@ export function SiteHeader() {
                 </>
               ) : (
                 <Link
-                  href="/login"
+                  href="/signin"
                   onClick={() => setOpen(false)}
                   className="border border-white/20 py-2.5 text-center text-xs font-bold uppercase tracking-wider text-white cursor-pointer"
                 >
