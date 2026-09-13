@@ -1,0 +1,19 @@
+# ---------------------------------------------------------------------------
+# NOT a standalone Caddyfile. This is the block to ADD to the SHARED Caddyfile
+# that already lives on the VPS (the one the ripple-of-hope proxy stack uses).
+#
+# The Caddy proxy container is shared across all projects on this VPS, so there
+# is exactly one Caddyfile. Paste the block below into it, then reload Caddy:
+#
+#   docker exec -w /etc/caddy caddy caddy reload
+#
+# "opfbex" must match the service name in compose.app.yml. Both containers are
+# on the external `proxy-net` network, so Caddy resolves it by Docker DNS.
+# ---------------------------------------------------------------------------
+
+# OPFBEX 2026 ticketing system. Automatic HTTPS via Let's Encrypt.
+opfbex.project01.ph {
+	encode gzip zstd
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	reverse_proxy opfbex:3000
+}

@@ -1,0 +1,15 @@
+# App stack — deployed to the VPS by CI. Joins the shared proxy network so
+# Caddy can route to it. Not exposed to the host directly.
+services:
+  opfbex:
+    image: ghcr.io/vjloable/ticketing-system:${IMAGE_TAG:-latest}
+    container_name: opfbex-ticketing
+    restart: unless-stopped
+    expose:
+      - "3000"
+    networks:
+      - proxy-net
+
+networks:
+  proxy-net:
+    external: true
