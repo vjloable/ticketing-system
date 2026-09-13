@@ -1,6 +1,5 @@
 "use client"
 
-import { use } from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { PassType, ClaimedPass } from "@/lib/pass-types"
@@ -9,6 +8,7 @@ import { useAuth } from "@/lib/auth-context"
 import { VisitorForm } from "@/components/forms/VisitorForm"
 import { ExhibitorForm } from "@/components/forms/ExhibitorForm"
 import { SponsorForm } from "@/components/forms/SponsorForm"
+import { ClaimGoogleFormsPass } from "@/components/forms/ClaimGoogleFormsPass"
 
 const passMeta: Record<
   PassType,
@@ -34,21 +34,16 @@ const passMeta: Record<
   },
 }
 
-export default function RegisterPassPage({
-  params,
-}: {
-  params: Promise<{ passType: string }>
-}) {
-  const resolvedParams = use(params)
-  const passType = (resolvedParams.passType as PassType) || "visitor"
+export function RegisterPassView({ passType }: { passType: PassType }) {
   const meta = passMeta[passType] || passMeta.visitor
-
   const { user, isLoading, claimPass } = useAuth()
   const [successPass, setSuccessPass] = useState<ClaimedPass | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isGoogleFormsClaim, setIsGoogleFormsClaim] = useState(false)
 
   const registrationCheck = isRegistrationOpen(passType)
+  const currentRoute = `/register-${passType}`
 
   const handleFormSubmit = async (formData: any) => {
     if (!user) return
@@ -77,7 +72,7 @@ export default function RegisterPassPage({
     )
   }
 
-  // Cutoff policy check
+  // 1. Cutoff policy check
   if (!registrationCheck.isOpen) {
     return (
       <div className="bg-grape-950 py-20 px-5">
@@ -108,7 +103,7 @@ export default function RegisterPassPage({
     )
   }
 
-  // Auth requirement guard
+  // 2. Auth requirement guard
   if (!user) {
     return (
       <div className="bg-grape-950 py-20 px-5">
@@ -127,16 +122,16 @@ export default function RegisterPassPage({
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              href={`/login?redirect=/register/${passType}`}
+              href={`/signin?redirect=${encodeURIComponent(currentRoute)}`}
               className="border border-marigold bg-marigold px-8 py-3 text-xs font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-marigold cursor-pointer"
             >
-              Sign In / Register Account
+              Sign In
             </Link>
             <Link
-              href="/"
-              className="border border-white/20 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:border-white cursor-pointer"
+              href={`/signup?redirect=${encodeURIComponent(currentRoute)}`}
+              className="border border-white/30 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:border-white cursor-pointer"
             >
-              Back to Home
+              Create Account
             </Link>
           </div>
         </div>
@@ -144,7 +139,7 @@ export default function RegisterPassPage({
     )
   }
 
-  // Success Confirmation screen
+  // 3. Success Confirmation screen
   if (successPass) {
     return (
       <div className="bg-grape-950 py-20 px-5">
@@ -212,6 +207,34 @@ export default function RegisterPassPage({
           </div>
         )}
 
+        {/* Dual-Persona Tab (Visitor Pass Only) */}
+        {passType === "visitor" && (
+          <div className="mt-6 flex border border-white/15 bg-grape-950 p-1">
+            <button
+              type="button"
+              onClick={() => setIsGoogleFormsClaim(false)}
+              className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                !isGoogleFormsClaim
+                  ? "border border-marigold bg-marigold text-grape-950"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              1. New Registration
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsGoogleFormsClaim(true)}
+              className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                isGoogleFormsClaim
+                  ? "border border-marigold bg-marigold text-grape-950"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              2. Pre-Registered on Google Forms?
+            </button>
+          </div>
+        )}
+
         <div className="mt-8 relative">
           {isSubmitting && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-grape-950/75 backdrop-blur-[2px]">
@@ -220,10 +243,14 @@ export default function RegisterPassPage({
           )}
 
           {passType === "visitor" && (
-            <VisitorForm
-              onSubmit={handleFormSubmit}
-              initialData={{ fullName: user.name, email: user.email }}
-            />
+            isGoogleFormsClaim ? (
+              <ClaimGoogleFormsPass onBack={() => setIsGoogleFormsClaim(false)} />
+            ) : (
+              <VisitorForm
+                onSubmit={handleFormSubmit}
+                initialData={{ fullName: user.name, email: user.email }}
+              />
+            )
           )}
           {passType === "exhibitor" && (
             <ExhibitorForm

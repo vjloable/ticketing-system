@@ -22,7 +22,6 @@ export function Logo({ compact = false }: { compact?: boolean }) {
             {l.c}
           </span>
         ))}
-        <span className="text-white">26</span>
       </span>
     </Link>
   );

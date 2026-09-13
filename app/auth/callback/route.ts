@@ -14,5 +14,5 @@ export async function GET(request: Request) {
   }
 
   // Return user to error page or login with error message if verification fails
-  return NextResponse.redirect(`${origin}/login?error=Failed to verify your email. Please try logging in again.`)
+  return NextResponse.redirect(`${origin}/signin?error=Failed to verify your email. Please try logging in again.`)
 }

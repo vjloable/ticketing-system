@@ -53,7 +53,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </Link>
             ) : (
               <Link
-                href="/login?redirect=/admin"
+                href="/signin?redirect=/admin"
                 className="border border-marigold bg-marigold px-5 py-2 text-xs font-bold uppercase tracking-wider text-grape-950"
               >
                 Sign In with Admin Account
