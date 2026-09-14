@@ -36,8 +36,8 @@ This document outlines the operational workflows, technical architecture, and im
 | **F4: QR Scanner & Check-in** | ✅ **Completed** | Camera scanning with `@zxing`/`html5-qrcode`, audio chime, and duplicate scan alerts in `/admin/scan`. |
 | **F5: Google Forms Migration** | ✅ **Completed** | 394 registrants ingested; zero-login email lookup & atomic claim stored procedure in Postgres. |
 | **F6: Dedicated Auth & Routes** | ✅ **Completed** | Clean separation of `/register-visitor`, `/register-exhibitor`, `/register-sponsor`, `/signin`, and `/signup`. |
-| **F7: Video Showcase** | 🚀 **In Progress** | Video thumbnail showcasing highlight footage of last year's event with modal video playback. |
-| **F8: Sponsor Logo Belt** | 🚀 **In Progress** | Infinite marquee/belt displaying event sponsors, exhibitors, and media partners. |
+| **F7: Ambient Video Showcase** | ✅ **Completed** | Cinematic ambient video background in Hero (`HeroVideoBackground.tsx`) with understated modal recap trigger (`WatchReelButton.tsx`). |
+| **F8: Sponsor Logo Belt** | ✅ **Completed** | 3-tier responsive marquee (`SponsorMarquee.tsx`) featuring 128 brands on brand marigold with borderless floating logos. |
 | **F9: Shuttle Bus Transit** | ⏳ **Upcoming** | Key pickup hubs (Dau, Clark Airport, SM Clark) with timetable schedule on homepage. |
 | **F10: PayMongo E-Commerce** | ⏳ **Upcoming** | Paid ticket checkout session API & webhook verification at `/tickets`. |
 
@@ -86,25 +86,17 @@ graph TD
 #### F6: Public Authentication & Route Refactor
 * Independent, SEO-optimized landing routes for `/register-visitor`, `/register-exhibitor`, `/register-sponsor`, `/signin`, and `/signup`.
 
+#### F7: Ambient Video Showcase & Recap Reel
+* **Hero Background:** `HeroVideoBackground.tsx` provides high-definition ambient video loop (`.webm` + `.mp4`) behind the Hero section with asymmetric brand grape gradients to preserve text legibility.
+* **Modal Trigger:** `WatchReelButton.tsx` provides an understated ghost link trigger opening a responsive 16:9 modal player with full audio, controls, and `ESC` dismissal.
+
+#### F8: 3-Tier Sponsor & Partner Logo Belt
+* **Brand Ingestion:** 128 participating brands (35 Partners, 13 Sponsors, 80 Exhibitors) parsed from `lib/OPFBEX2026 - Brand List.csv` into typed data structure `lib/brand-data.ts`.
+* **Design & Motion:** `SponsorMarquee.tsx` renders borderless floating logos directly on the OPFBEX `marigold` surface with brutalist grape corner crosshairs, fluid responsive sizing (`sm:`, `md:`, `lg:`), and organic hierarchy conveyed through proportion, spacing, and velocity.
+
 ---
 
-### In-Progress & Upcoming Features (`feature/ui-enhancements`)
-
-#### F7: Landing Page Video Showcase (Past Event Footage)
-* **Objective:** Build visitor excitement by highlighting footage and energy from last year's expo.
-* **Component:** `components/home/VideoShowcase.tsx` on `app/page.tsx`.
-* **Features:**
-  * High-definition video thumbnail with brand styling (`border-marigold`, hover zoom effect, and gradient overlays).
-  * Centered brutalist play button with micro-animations.
-  * Responsive modal video player supporting YouTube/Vimeo embed or hosted MP4 video stream.
-
-#### F8: Sponsor & Partner Infinite Logo Belt
-* **Objective:** Showcase participating sponsors, major exhibitors, and media partners with a modern, high-engagement ticker belt.
-* **Component:** `components/home/SponsorMarquee.tsx` on `app/page.tsx`.
-* **Features:**
-  * Smooth infinite horizontal scrolling marquee / ticker animation.
-  * Grouping by tier: Title Sponsor, Co-Presenters, Major Exhibitors, and Media Partners.
-  * Pause-on-hover interaction with grayscale-to-full-color hover transitions.
+### In-Progress & Upcoming Features 
 
 #### F9: Shuttle Bus Transit Schedule & Route Maps
 * **Objective:** Provide clear transit information and pickup points to SMX Convention Center Clark.
