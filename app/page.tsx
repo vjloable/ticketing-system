@@ -1,12 +1,21 @@
 import Link from "next/link"
+import { VideoShowcase } from "@/components/home/VideoShowcase"
+import { SponsorMarquee } from "@/components/home/SponsorMarquee"
 
 export default function Home() {
   return (
     <>
       <Hero />
+      {/* Infinite Sponsor & Partner Belt */}
+      <SponsorMarquee />
+
       <PartnerPassesSection />
       <Marquee />
       <About />
+
+      {/* Highlight Video Showcase Reel */}
+      <VideoShowcase videoUrl="/opfbex25-highlights.mp4"  />
+
       <Highlights />
       <Exhibitors />
       <Schedule />
