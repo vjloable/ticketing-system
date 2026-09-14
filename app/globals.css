@@ -63,7 +63,8 @@ body {
 @media print {
   body {
     background-color: #ffffff !important;
-    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   header,
@@ -82,7 +83,9 @@ body {
   }
 
   .print-badge-card {
-    border: 2px solid #000000 !important;
+    background-color: #2a1552 !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(255, 255, 255, 0.25) !important;
     box-shadow: none !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;

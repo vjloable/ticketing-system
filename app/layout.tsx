@@ -18,6 +18,7 @@ const body = Poppins({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://opfbex.project01.ph"),
   title: "OPFBEX 2026 — Central Luzon's Premier Culinary Expo",
   description:
     "OPFBEX 2026 returns for Year 2. September 19–20, SMX Clark. Taste, discover, and connect at Central Luzon's premier food & beverage expo.",
@@ -39,6 +40,8 @@ export const metadata: Metadata = {
     title: "OPFBEX 2026 — Central Luzon's Premier Culinary Expo",
     description:
       "OPFBEX 2026 returns for Year 2. September 19–20, SMX Clark. Taste, discover, and connect at Central Luzon's premier food & beverage expo.",
+    url: "https://opfbex.project01.ph",
+    siteName: "OPFBEX 2026",
     images: [
       {
         url: "/banner.png",
@@ -47,6 +50,8 @@ export const metadata: Metadata = {
         alt: "OPFBEX 2026 Expo Banner",
       },
     ],
+    locale: "en_PH",
+    type: "website",
   },
 }
 
@@ -54,7 +59,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${body.variable}`}>
       <body className="min-h-screen antialiased">
         <AuthProvider>
           <SiteHeader />

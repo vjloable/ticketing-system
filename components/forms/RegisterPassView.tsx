@@ -103,8 +103,56 @@ export function RegisterPassView({ passType }: { passType: PassType }) {
     )
   }
 
-  // 2. Auth requirement guard
-  if (!user) {
+  // 2. Success Confirmation screen
+  if (successPass) {
+    return (
+      <div className="bg-grape-950 py-20 px-5">
+        <div className="mx-auto max-w-lg border border-white/15 bg-grape-900 p-8 sm:p-12 text-center">
+          <span className="text-4xl">🎉</span>
+          <div className="mt-4 eyebrow text-basil">Registration Successful</div>
+          <h1 className="mt-2 font-display text-3xl font-black">You are Registered!</h1>
+          <p className="mt-3 text-sm text-white/70">
+            Your {meta.badge} has been secured.
+          </p>
+
+          <div className="my-8 border border-white/15 bg-grape-950 p-6 text-left">
+            <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              <span className="eyebrow text-white/40">Pass Code</span>
+              <span className="font-display font-bold text-marigold tracking-wider">
+                {successPass.ticketCode}
+              </span>
+            </div>
+            <div className="mt-3 text-xs text-white/60 space-y-1">
+              <p><span className="text-white/40">Type:</span> {meta.badge}</p>
+              <p><span className="text-white/40">Status:</span> <span className="uppercase text-basil font-semibold">{successPass.status}</span></p>
+              <p><span className="text-white/40">Holder:</span> {user?.name || successPass.formData?.fullName || "Attendee"}</p>
+              <p><span className="text-white/40">Date:</span> Sept 19–20, 2026 · SMX Clark</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link
+              href={`/passes/${successPass.id}/print`}
+              className="flex-1 border border-marigold bg-marigold py-3 text-center text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-marigold cursor-pointer"
+            >
+              🖨️ Print Badge
+            </Link>
+            {user && (
+              <Link
+                href="/passes"
+                className="flex-1 border border-white/20 py-3 text-center text-xs font-bold uppercase tracking-wider text-white hover:border-white cursor-pointer"
+              >
+                View My Passes
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // 3. For Exhibitors & Sponsors: Account is always required
+  if (passType !== "visitor" && !user) {
     return (
       <div className="bg-grape-950 py-20 px-5">
         <div className="mx-auto max-w-xl border border-white/12 bg-grape-900 p-8 sm:p-12 text-center">
@@ -115,9 +163,8 @@ export function RegisterPassView({ passType }: { passType: PassType }) {
             Account Required
           </h1>
           <p className="mt-4 text-white/70 leading-relaxed">
-            You need to be signed in to claim your{" "}
-            <span className="font-semibold text-white">{meta.badge}</span>.
-            Please sign in or create a free member account.
+            You need to be signed in to submit an{" "}
+            <span className="font-semibold text-white">{meta.badge}</span> application.
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
@@ -132,52 +179,6 @@ export function RegisterPassView({ passType }: { passType: PassType }) {
               className="border border-white/30 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:border-white cursor-pointer"
             >
               Create Account
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // 3. Success Confirmation screen
-  if (successPass) {
-    return (
-      <div className="bg-grape-950 py-20 px-5">
-        <div className="mx-auto max-w-lg border border-white/15 bg-grape-900 p-8 sm:p-12 text-center">
-          <span className="text-4xl">🎉</span>
-          <div className="mt-4 eyebrow text-basil">Registration Successful</div>
-          <h1 className="mt-2 font-display text-3xl font-black">You are Registered!</h1>
-          <p className="mt-3 text-sm text-white/70">
-            Your {meta.badge} has been secured and attached to your account.
-          </p>
-
-          <div className="my-8 border border-white/15 bg-grape-950 p-6 text-left">
-            <div className="flex justify-between items-center border-b border-white/10 pb-3">
-              <span className="eyebrow text-white/40">Pass Code</span>
-              <span className="font-display font-bold text-marigold tracking-wider">
-                {successPass.ticketCode}
-              </span>
-            </div>
-            <div className="mt-3 text-xs text-white/60 space-y-1">
-              <p><span className="text-white/40">Type:</span> {meta.badge}</p>
-              <p><span className="text-white/40">Status:</span> <span className="uppercase text-basil font-semibold">{successPass.status}</span></p>
-              <p><span className="text-white/40">Holder:</span> {user.name}</p>
-              <p><span className="text-white/40">Date:</span> Sept 19–20, 2026 · SMX Clark</p>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Link
-              href={`/passes/${successPass.id}/print`}
-              className="flex-1 border border-marigold bg-marigold py-3 text-center text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-marigold cursor-pointer"
-            >
-              🖨️ Print Badge
-            </Link>
-            <Link
-              href="/passes"
-              className="flex-1 border border-white/20 py-3 text-center text-xs font-bold uppercase tracking-wider text-white hover:border-white cursor-pointer"
-            >
-              View My Passes
             </Link>
           </div>
         </div>
@@ -207,7 +208,7 @@ export function RegisterPassView({ passType }: { passType: PassType }) {
           </div>
         )}
 
-        {/* Dual-Persona Tab (Visitor Pass Only) */}
+        {/* Dual-Persona Tab (Visitor Pass Only - Fully public) */}
         {passType === "visitor" && (
           <div className="mt-6 flex border border-white/15 bg-grape-950 p-1">
             <button
@@ -242,23 +243,55 @@ export function RegisterPassView({ passType }: { passType: PassType }) {
             </div>
           )}
 
-          {passType === "visitor" && (
-            isGoogleFormsClaim ? (
-              <ClaimGoogleFormsPass onBack={() => setIsGoogleFormsClaim(false)} />
-            ) : (
+          {/* If on Google Forms Tab: Render public Claim widget (NO LOGIN NEEDED) */}
+          {passType === "visitor" && isGoogleFormsClaim && (
+            <ClaimGoogleFormsPass onBack={() => setIsGoogleFormsClaim(false)} />
+          )}
+
+          {/* If on New Registration Tab: Check if logged in */}
+          {passType === "visitor" && !isGoogleFormsClaim && (
+            user ? (
               <VisitorForm
                 onSubmit={handleFormSubmit}
                 initialData={{ fullName: user.name, email: user.email }}
               />
+            ) : (
+              <div className="border border-white/10 bg-grape-950 p-8 text-center">
+                <span className="eyebrow text-marigold">Step 1 of 2</span>
+                <h3 className="mt-2 font-display text-xl font-bold text-white">
+                  Sign In or Create Account to Register
+                </h3>
+                <p className="mt-2 text-xs text-white/60 max-w-md mx-auto">
+                  New visitors need a free member account so your official pass and QR badge are securely tied to you.
+                </p>
+                <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                  <Link
+                    href={`/signin?redirect=${encodeURIComponent(currentRoute)}`}
+                    className="border border-marigold bg-marigold px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-marigold transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href={`/signup?redirect=${encodeURIComponent(currentRoute)}`}
+                    className="border border-white/25 px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:border-white transition-colors"
+                  >
+                    Create Free Account
+                  </Link>
+                </div>
+              </div>
             )
           )}
-          {passType === "exhibitor" && (
+
+          {/* Exhibitor Form */}
+          {passType === "exhibitor" && user && (
             <ExhibitorForm
               onSubmit={handleFormSubmit}
               initialData={{ contactPerson: user.name, email: user.email }}
             />
           )}
-          {passType === "sponsor" && (
+
+          {/* Sponsor Form */}
+          {passType === "sponsor" && user && (
             <SponsorForm
               onSubmit={handleFormSubmit}
               initialData={{ contactPerson: user.name, email: user.email }}
