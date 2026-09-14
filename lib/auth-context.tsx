@@ -42,15 +42,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq("id", userId)
         .maybeSingle()
 
-      if (profileError) {
-        console.error("[Auth] Error fetching user profile:", profileError)
-      }
+      if (profileError) console.error("[Auth] Error fetching user profile:", profileError)
 
-      // 2. Fetch Passes
+      // 2. Fetch Passes (by user_id OR by matching email in form_data)
       const { data: passesData } = await supabase
         .from("passes")
         .select("id, event_id, pass_type, ticket_code, status, form_data, created_at")
-        .eq("user_id", userId)
+        .or(`user_id.eq.${userId},form_data->>email.eq.${email.trim().toLowerCase()}`)
         .order("created_at", { ascending: false })
 
       const mappedPasses: ClaimedPass[] = (passesData || []).map((p) => ({
