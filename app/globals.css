@@ -39,11 +39,30 @@ body {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
+/* In app/globals.css */
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
 .animate-marquee { animation: marquee 30s linear infinite; }
+
+/* Pause marquee when container or item is hovered */
+.animate-marquee:hover,
+.group:hover .animate-marquee {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-reverse {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+.animate-marquee-reverse {
+  animation: marquee-reverse 35s linear infinite;
+}
+.animate-marquee-reverse:hover,
+.group:hover .animate-marquee-reverse {
+  animation-play-state: paused;
+}
 
 /* Fine vertical column guides */
 .col-guides {

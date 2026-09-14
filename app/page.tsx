@@ -1,9 +1,13 @@
 import Link from "next/link"
+import { HeroVideoBackground } from "@/components/home/HeroVideoBackground"
+import { WatchReelButton } from "@/components/home/WatchReelButton"
+import { SponsorMarquee } from "@/components/home/SponsorMarquee"
 
 export default function Home() {
   return (
     <>
       <Hero />
+      <SponsorMarquee />
       <PartnerPassesSection />
       <Marquee />
       <About />
@@ -19,8 +23,15 @@ export default function Home() {
 /* ---------------- HERO ---------------- */
 function Hero() {
   return (
-    <section className="border-b border-white/12 bg-grape-900">
-      <div className="mx-auto max-w-6xl px-5">
+    <section className="relative overflow-hidden border-b border-white/12 bg-grape-950">
+      {/* Modular Dimmed Ambient Background Video */}
+      <HeroVideoBackground
+        webmSrc="/opfbex25-highlights.webm"
+        mp4Src="/opfbex25-highlights.mp4"
+      />
+
+      {/* Hero Foreground Content */}
+      <div className="relative z-10 mx-auto max-w-6xl px-5">
         <div className="grid border-x border-white/12 md:grid-cols-12">
           {/* Left: type */}
           <div className="border-b border-white/12 px-6 py-14 md:col-span-8 md:border-b-0 md:border-r md:py-20">
@@ -61,6 +72,9 @@ function Hero() {
               >
                 Exhibitor &amp; Sponsor Passes
               </Link>
+              
+              {/* Watch Recap Reel Modal Trigger */}
+              <WatchReelButton />
             </div>
           </div>
 
