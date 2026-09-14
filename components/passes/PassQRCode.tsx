@@ -42,10 +42,10 @@ export function PassQRCode({
 
       {showCodeText && (
         <div className="mt-2 text-center">
-          <p className="text-[10px] uppercase font-bold tracking-widest text-white/50 print:text-black/60">
+          <p className="text-[10px] uppercase font-bold tracking-widest text-white/50">
             Ticket Code
           </p>
-          <p className="font-mono text-sm font-black tracking-wider text-marigold print:text-black">
+          <p className="font-mono text-sm font-black tracking-wider text-marigold">
             {value}
           </p>
         </div>
