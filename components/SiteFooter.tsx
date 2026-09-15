@@ -40,9 +40,7 @@ export function SiteFooter() {
         <FooterCol
           title="Attend"
           links={[
-            ["Tickets", "/tickets"],
             ["Exhibitors", "/#exhibitors"],
-            ["Sponsorship", "/#exhibitors"],
           ]}
         />
 
