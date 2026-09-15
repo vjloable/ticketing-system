@@ -1,13 +1,42 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Logo } from "@/components/Logo"
 import { useAuth } from "@/lib/auth-context"
+import { createClient } from "@/lib/supabase/client"
 
 export function AdminNav() {
   const pathname = usePathname()
   const { user, logout } = useAuth()
+  const [pendingCount, setPendingCount] = useState(0)
+
+  // Fetch pending approval count + subscribe to realtime updates
+  useEffect(() => {
+    const supabase = createClient()
+
+    const fetchPending = async () => {
+      const { count } = await supabase
+        .from("passes")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending_verification")
+      setPendingCount(count || 0)
+    }
+
+    fetchPending()
+
+    const channel = supabase
+      .channel("admin-nav-pending")
+      .on("postgres_changes", { event: "*", schema: "public", table: "passes" }, () => {
+        fetchPending()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   const links = [
     { label: "Attendee Directory", href: "/admin", icon: "📋" },
@@ -23,6 +52,16 @@ export function AdminNav() {
           <span className="border border-marigold/40 bg-marigold/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-marigold">
             Admin Ops
           </span>
+          {/* Pending Badge */}
+          {pendingCount > 0 && (
+            <Link
+              href="/admin"
+              className="flex items-center gap-1 border border-marigold bg-marigold/20 px-2 py-0.5 text-[10px] font-bold text-marigold animate-pulse"
+              title={`${pendingCount} passes awaiting approval`}
+            >
+              ⏳ {pendingCount} pending
+            </Link>
+          )}
         </div>
 
         {/* Center: Navigation Links */}
