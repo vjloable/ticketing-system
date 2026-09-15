@@ -1,5 +1,7 @@
 "use client"
 
+import { getAssetUrl } from "@/lib/assets"
+
 interface HeroVideoBackgroundProps {
   mp4Src?: string
   webmSrc?: string
@@ -8,8 +10,8 @@ interface HeroVideoBackgroundProps {
 }
 
 export function HeroVideoBackground({
-  mp4Src = "/opfbex25-highlights.mp4",
-  webmSrc = "/opfbex25-highlights.webm",
+  mp4Src = getAssetUrl("/opfbex25-highlights.mp4"),
+  webmSrc = getAssetUrl("/opfbex25-highlights.webm"),
   opacityClass = "opacity-85",
 }: HeroVideoBackgroundProps) {
   return (

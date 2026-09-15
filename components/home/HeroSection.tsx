@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { HeroVideoBackground } from "@/components/home/HeroVideoBackground"
 import { WatchReelButton } from "@/components/home/WatchReelButton"
+import { getAssetUrl } from "@/lib/assets"
 
 function Fact({
   label,
@@ -30,8 +31,8 @@ export function HeroSection() {
   return (
     <section className="relative overflow-hidden border-b border-white/12 bg-grape-950">
       <HeroVideoBackground
-        webmSrc="/opfbex25-highlights.webm"
-        mp4Src="/opfbex25-highlights.mp4"
+        webmSrc={getAssetUrl("/opfbex25-highlights.webm")}
+        mp4Src={getAssetUrl("/opfbex25-highlights.mp4")}
       />
 
       <div className="relative z-10 mx-auto max-w-6xl px-5">

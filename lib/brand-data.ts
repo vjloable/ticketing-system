@@ -1,10 +1,15 @@
+import { getAssetUrl } from "@/lib/assets"
+
 export interface Brand {
   name: string
   logo: string
 }
 
+const withStorageUrl = (items: Brand[]): Brand[] =>
+  items.map((b) => ({ ...b, logo: getAssetUrl(b.logo) }))
+
 /* ---------------- 1. PARTNERS (35 Brands) ---------------- */
-export const PARTNERS: Brand[] = [
+export const PARTNERS: Brand[] = withStorageUrl([ 
   { name: "Pampanga Provincial Board", logo: "/business_logos/partners/Pampanga Provincial Board.webp" },
   { name: "Angeles City", logo: "/business_logos/partners/Angeles City.webp" },
   { name: "Experience, Live, Love Angeles", logo: "/business_logos/partners/Angeles City_2.webp" },
@@ -40,10 +45,10 @@ export const PARTNERS: Brand[] = [
   { name: "RW 95.1 FM", logo: "/business_logos/partners/RW 95.1 FM.webp" },
   { name: "Pampanga Press Club", logo: "/business_logos/partners/Pampanga Press Club.webp" },
   { name: "JPG Exhibition Booth Rentals", logo: "/business_logos/partners/JPG Exhibition Booth Rentals.webp" },
-]
+])
 
 /* ---------------- 2. SPONSORS (13 Brands) ---------------- */
-export const SPONSORS: Brand[] = [
+export const SPONSORS: Brand[] = withStorageUrl([ 
   { name: "Savers Group Holdings Inc.", logo: "/business_logos/sponsors/Savers Group Holdings Inc.webp" },
   { name: "GCash", logo: "/business_logos/sponsors/GCash.webp" },
   { name: "Department of Tourism", logo: "/business_logos/sponsors/Department of Tourism.webp" },
@@ -57,10 +62,10 @@ export const SPONSORS: Brand[] = [
   { name: "ADM Catering", logo: "/business_logos/sponsors/ADM Catering.webp" },
   { name: "Esme Restaurant", logo: "/business_logos/sponsors/Esme Restaurant.webp" },
   { name: "Asuncion's Private Dining", logo: "/business_logos/sponsors/Asuncion's Private Dining.webp" },
-]
+])
 
 /* ---------------- 3. EXHIBITORS (80 Brands) ---------------- */
-export const EXHIBITORS: Brand[] = [
+export const EXHIBITORS: Brand[] = withStorageUrl([
   { name: "bcmm", logo: "/business_logos/exhibitor/bcmm.webp" },
   { name: "Best Western Plus Hotel Subic", logo: "/business_logos/exhibitor/Best Western Plus Hotel Subic.webp" },
   { name: "Best Western Plus Metro Clark", logo: "/business_logos/exhibitor/Best Western Plus Metro Clark.webp" },
@@ -141,4 +146,4 @@ export const EXHIBITORS: Brand[] = [
   { name: "Whisk & Sip", logo: "/business_logos/exhibitor/Whisk & Sip.webp" },
   { name: "Silung Coffee", logo: "/business_logos/exhibitor/Silung Coffee.webp" },
   { name: "M2", logo: "/business_logos/exhibitor/M2.webp" },
-]
+])

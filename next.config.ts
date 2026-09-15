@@ -18,10 +18,18 @@ function resolveAppVersion(): string {
 }
 
 const nextConfig: NextConfig = {
-  // Emit a minimal self-contained server bundle for the Docker runtime image.
   output: "standalone",
   env: {
     NEXT_PUBLIC_APP_VERSION: resolveAppVersion(),
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
   },
 };
 
