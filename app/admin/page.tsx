@@ -9,6 +9,9 @@ import { AdminStatsCards } from "@/components/admin/AdminStatsCards"
 import { PassStatusBadge } from "@/components/passes/PassStatusBadge"
 import { AdminPassDetailModal } from "@/components/admin/AdminPassDetailModal"
 
+type SortField = "name" | "passType" | "status" | "claimedAt" | "checkedInAt"
+type SortDirection = "asc" | "desc"
+
 export default function AdminDashboardPage() {
   const { user } = useAuth()
   const [passes, setPasses] = useState<AdminPassRecord[]>([])
@@ -19,6 +22,8 @@ export default function AdminDashboardPage() {
   const [inspectingPass, setInspectingPass] = useState<AdminPassRecord | null>(null)
   const [feedback, setFeedback] = useState<{ text: string; type: "success" | "error" } | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [sortField, setSortField] = useState<SortField>("claimedAt")
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
   const itemsPerPage = 15
 
   const supabase = createClient()
@@ -27,6 +32,52 @@ export default function AdminDashboardPage() {
     setFeedback({ text, type })
     setTimeout(() => setFeedback(null), 4000)
   }
+
+  // CSV Export — respects current filters
+  const exportToCSV = () => {
+    const headers = [
+      "Ticket Code", "Name", "Company", "Email", "Phone",
+      "Pass Type", "Status", "Registered At", "Checked In At",
+    ]
+    const rows = filteredPasses.map((p) => [
+      p.ticketCode,
+      p.formData?.fullName || p.formData?.contactPerson || p.userProfile?.fullName || "",
+      p.formData?.companyName || p.formData?.organization || "",
+      p.formData?.email || p.userProfile?.email || "",
+      p.formData?.phone || "",
+      p.passType,
+      p.status,
+      new Date(p.claimedAt).toLocaleString("en-US", { timeZone: "Asia/Manila" }),
+      p.checkedInAt
+        ? new Date(p.checkedInAt).toLocaleString("en-US", { timeZone: "Asia/Manila" })
+        : "",
+    ])
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `opfbex-attendees-${new Date().toISOString().split("T")[0]}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  // Column Sort Toggle
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection((d) => (d === "asc" ? "desc" : "asc"))
+    } else {
+      setSortField(field)
+      setSortDirection("asc")
+    }
+  }
+
+  const sortIndicator = (field: SortField) =>
+    sortField === field ? (sortDirection === "asc" ? " ↑" : " ↓") : ""
 
   // Fetch all passes with profiles
   const fetchPasses = useCallback(async () => {
@@ -177,9 +228,38 @@ export default function AdminDashboardPage() {
     return matchesQuery && matchesStatus && matchesType
   })
 
+  // Sort Logic
+  const sortedPasses = [...filteredPasses].sort((a, b) => {
+    const dir = sortDirection === "asc" ? 1 : -1
+    switch (sortField) {
+      case "name": {
+        const nameA = (
+          a.formData?.fullName || a.formData?.contactPerson || a.userProfile?.fullName || ""
+        ).toLowerCase()
+        const nameB = (
+          b.formData?.fullName || b.formData?.contactPerson || b.userProfile?.fullName || ""
+        ).toLowerCase()
+        return nameA.localeCompare(nameB) * dir
+      }
+      case "passType":
+        return a.passType.localeCompare(b.passType) * dir
+      case "status":
+        return a.status.localeCompare(b.status) * dir
+      case "claimedAt":
+        return (new Date(a.claimedAt).getTime() - new Date(b.claimedAt).getTime()) * dir
+      case "checkedInAt": {
+        const timeA = a.checkedInAt ? new Date(a.checkedInAt).getTime() : 0
+        const timeB = b.checkedInAt ? new Date(b.checkedInAt).getTime() : 0
+        return (timeA - timeB) * dir
+      }
+      default:
+        return 0
+    }
+  })
+
   // Pagination Logic
-  const totalPages = Math.ceil(filteredPasses.length / itemsPerPage) || 1
-  const paginatedPasses = filteredPasses.slice(
+  const totalPages = Math.ceil(sortedPasses.length / itemsPerPage) || 1
+  const paginatedPasses = sortedPasses.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   )
@@ -197,6 +277,13 @@ export default function AdminDashboardPage() {
 
         <div className="flex items-center gap-3">
           <button
+            onClick={exportToCSV}
+            className="border border-white/20 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-white hover:bg-white/10 cursor-pointer"
+            title="Export filtered list as CSV"
+          >
+            📥 Export CSV
+          </button>
+          <button
             onClick={() => fetchPasses()}
             className="border border-white/20 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-white hover:bg-white/10 cursor-pointer"
             title="Refresh list"
@@ -206,18 +293,20 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Toast Notification */}
-      {feedback && (
-        <div
-          className={`mt-4 border p-3 text-xs font-semibold ${
-            feedback.type === "success"
-              ? "border-basil/50 bg-basil/10 text-basil"
-              : "border-chili/50 bg-chili/10 text-chili"
-          }`}
-        >
-          {feedback.type === "success" ? "✓" : "⚠️"} {feedback.text}
-        </div>
-      )}
+      {/* Toast Notification — ARIA Live Region */}
+      <div role="status" aria-live="polite" aria-atomic="true" className="mt-4">
+        {feedback && (
+          <div
+            className={`border p-3 text-xs font-semibold ${
+              feedback.type === "success"
+                ? "border-basil/50 bg-basil/10 text-basil"
+                : "border-chili/50 bg-chili/10 text-chili"
+            }`}
+          >
+            {feedback.type === "success" ? "✓" : "⚠️"} {feedback.text}
+          </div>
+        )}
+      </div>
 
       {/* Stats Cards Section */}
       <div className="mt-6">
@@ -229,8 +318,12 @@ export default function AdminDashboardPage() {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           {/* Search Box */}
           <div className="relative flex-1 max-w-md">
+            <label htmlFor="admin-search" className="sr-only">
+              Search attendees by ticket code, name, company, or email
+            </label>
             <input
-              type="text"
+              id="admin-search"
+              type="search"
               placeholder="Search by ticket code, name, company, email..."
               value={searchQuery}
               onChange={(e) => {
@@ -243,6 +336,7 @@ export default function AdminDashboardPage() {
               <button
                 onClick={() => setSearchQuery("")}
                 className="absolute right-3 top-2.5 text-xs text-white/40 hover:text-white"
+                aria-label="Clear search"
               >
                 ✕
               </button>
@@ -268,7 +362,11 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Status Filter Tabs */}
-        <div className="mt-4 flex flex-wrap gap-2 border-t border-white/10 pt-3">
+        <div
+          className="mt-4 flex flex-wrap gap-2 border-t border-white/10 pt-3"
+          role="group"
+          aria-label="Filter by pass status"
+        >
           {(["all", "active", "checked_in", "pending_verification", "cancelled"] as const).map((st) => (
             <button
               key={st}
@@ -276,6 +374,7 @@ export default function AdminDashboardPage() {
                 setSelectedStatus(st)
                 setCurrentPage(1)
               }}
+              aria-pressed={selectedStatus === st}
               className={`px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                 selectedStatus === st
                   ? "border border-marigold bg-marigold text-grape-950"
@@ -292,19 +391,79 @@ export default function AdminDashboardPage() {
       <div className="mt-6 border border-white/12 bg-grape-900 overflow-x-auto">
         {isLoading ? (
           <div className="p-12 text-center text-xs text-white/50">Loading attendees...</div>
-        ) : filteredPasses.length === 0 ? (
+        ) : sortedPasses.length === 0 ? (
           <div className="p-12 text-center text-xs text-white/50">No attendee passes found matching filters.</div>
         ) : (
           <table className="w-full text-left text-xs text-white/80 border-collapse">
             <thead>
               <tr className="border-b border-white/12 bg-grape-950 text-[10px] uppercase tracking-wider text-white/50">
-                <th className="py-3 px-4">Ticket Code</th>
-                <th className="py-3 px-4">Attendee / Company</th>
-                <th className="py-3 px-4">Pass Type</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Registered</th>
-                <th className="py-3 px-4">Check-In</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="py-3 px-4" scope="col">Ticket Code</th>
+                <th
+                  className="py-3 px-4"
+                  scope="col"
+                  aria-sort={sortField === "name" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("name")}
+                    className="inline-flex items-center gap-1 hover:text-white transition-colors cursor-pointer text-inherit uppercase tracking-wider font-inherit"
+                  >
+                    Attendee / Company{sortIndicator("name")}
+                  </button>
+                </th>
+                <th
+                  className="py-3 px-4"
+                  scope="col"
+                  aria-sort={sortField === "passType" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("passType")}
+                    className="inline-flex items-center gap-1 hover:text-white transition-colors cursor-pointer text-inherit uppercase tracking-wider font-inherit"
+                  >
+                    Pass Type{sortIndicator("passType")}
+                  </button>
+                </th>
+                <th
+                  className="py-3 px-4"
+                  scope="col"
+                  aria-sort={sortField === "status" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("status")}
+                    className="inline-flex items-center gap-1 hover:text-white transition-colors cursor-pointer text-inherit uppercase tracking-wider font-inherit"
+                  >
+                    Status{sortIndicator("status")}
+                  </button>
+                </th>
+                <th
+                  className="py-3 px-4"
+                  scope="col"
+                  aria-sort={sortField === "claimedAt" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("claimedAt")}
+                    className="inline-flex items-center gap-1 hover:text-white transition-colors cursor-pointer text-inherit uppercase tracking-wider font-inherit"
+                  >
+                    Registered{sortIndicator("claimedAt")}
+                  </button>
+                </th>
+                <th
+                  className="py-3 px-4"
+                  scope="col"
+                  aria-sort={sortField === "checkedInAt" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("checkedInAt")}
+                    className="inline-flex items-center gap-1 hover:text-white transition-colors cursor-pointer text-inherit uppercase tracking-wider font-inherit"
+                  >
+                    Check-In{sortIndicator("checkedInAt")}
+                  </button>
+                </th>
+                <th className="py-3 px-4 text-right" scope="col">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10">
@@ -425,7 +584,7 @@ export default function AdminDashboardPage() {
         <div className="mt-4 flex items-center justify-between text-xs text-white/60">
           <div>
             Showing {(currentPage - 1) * itemsPerPage + 1}–
-            {Math.min(currentPage * itemsPerPage, filteredPasses.length)} of {filteredPasses.length} attendees
+            {Math.min(currentPage * itemsPerPage, sortedPasses.length)} of {sortedPasses.length} attendees
           </div>
           <div className="flex gap-2">
             <button
