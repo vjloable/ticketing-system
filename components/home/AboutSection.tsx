@@ -11,21 +11,29 @@ export function AboutSection() {
             tasters, and dreamers.
           </p>
           <p className="leading-relaxed">
-            In its second year, we&apos;re doubling the flavor: more exhibitors,
-            more live demos, and more reasons to come hungry. It is equal parts
-            marketplace, stage, and meeting ground for the people shaping how the
-            region eats.
+            In its second year, we&apos;re doubling the scope: 4 dynamic days across two premier venues,
+            incorporating the official <strong className="text-marigold">One Pampanga Culinary Cup (OPCC)</strong> at SM City Clark
+            and the grand <strong className="text-marigold">Food &amp; Beverage Expo and Food Forward Forum</strong> at SMX Convention Center Clark.
           </p>
+          <div className="pt-2 flex flex-wrap gap-2">
+            <span className="border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-white/70">
+              Sept 16–17 · SM City Clark
+            </span>
+            <span className="border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-white/70">
+              Sept 19–20 · SMX Clark
+            </span>
+          </div>
         </div>
         <dl className="divide-y divide-white/12 border-y border-white/12">
           {[
-            ["10K+", "Expected Guests"],
-            ["30+", "Live Demos"],
-            ["4", "Culinary Days"],
+            ["10K+", "Expected Visitors & Trade Buyers"],
+            ["100+", "Regional Food Brands & Exhibitors"],
+            ["8", "Official OPCC Culinary Categories"],
+            ["4", "Culinary Days Across 2 Venues"],
           ].map(([n, l]) => (
-            <div key={l} className="flex items-center justify-between py-5">
-              <dt className="text-white/60">{l}</dt>
-              <dd className="font-display text-3xl font-extrabold tracking-tight">{n}</dd>
+            <div key={l} className="flex items-center justify-between py-4">
+              <dt className="text-sm text-white/60">{l}</dt>
+              <dd className="font-display text-2xl font-extrabold tracking-tight text-white">{n}</dd>
             </div>
           ))}
         </dl>

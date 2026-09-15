@@ -72,45 +72,73 @@ export function CulinaryCupSection() {
     <Section
       id="culinary-cup"
       index="03"
-      label="Premier Regional Showdown"
-      title="One Pampanga Culinary Cup (OPCC)"
+      label="Premier Regional Championship"
+      title="One Pampanga Culinary Cup"
       action={
         <div className="flex flex-wrap items-center gap-3">
-          <span className="eyebrow border border-marigold/30 bg-marigold/10 px-3.5 py-1.5 text-marigold">
+          <span className="eyebrow border border-marigold/40 bg-marigold/10 px-3.5 py-1.5 text-marigold">
             Sept 16–17, 2026
           </span>
-          <span className="eyebrow border border-white/20 bg-white/5 px-3.5 py-1.5 text-white/70">
+          <span className="eyebrow border border-white/20 bg-white/5 px-3.5 py-1.5 text-white/80">
             SM City Clark The Event Centre
           </span>
         </div>
       }
     >
-      <div className="space-y-8">
-        {/* Intro & Venue Banner */}
-        <div className="grid gap-6 border border-white/12 bg-grape-900/60 p-6 md:grid-cols-12 md:p-8">
-          <div className="space-y-3 md:col-span-8">
-            <div className="eyebrow text-marigold">The Stage Is Set</div>
-            <h3 className="font-display text-2xl font-bold tracking-tight text-white sm:text-3xl">
-              Central Luzon&apos;s Highest Culinary Honor
-            </h3>
-            <p className="max-w-2xl text-sm leading-relaxed text-white/75">
-              The One Pampanga Culinary Cup (OPCC) gathers top professional chefs, hoteliers,
-              and junior culinary students in an intense, live two-day gastronomic championship.
-              Witness kitchen arena battles, sensory judging, and cutting-edge regional mastery.
-            </p>
-          </div>
-          <div className="flex flex-col justify-between border-t border-white/12 pt-4 md:col-span-4 md:border-t-0 md:border-l md:pl-6 md:pt-0">
-            <div>
-              <div className="eyebrow text-white/45">Venue Spotlight</div>
-              <div className="mt-1 font-display text-lg font-bold text-white">SM City Clark</div>
-              <div className="text-xs text-marigold">The Event Centre · Mall Ground Level</div>
-              <p className="mt-2 text-xs text-white/60 leading-normal">
-                360-degree open viewing layout for mallgoers, cheering squads, and food aficionados.
-              </p>
+      <div className="space-y-10">
+        {/* OPCC Hero Identity Showcase */}
+        <div className="border border-white/15 bg-linear-to-br from-grape-900 via-grape-950 to-grape-900 p-8 sm:p-12 relative overflow-hidden">
+          {/* Subtle Ambient Radial Glow behind the Logo */}
+          <div className="pointer-events-none absolute -top-20 -left-20 h-72 w-72 rounded-full bg-marigold/15 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-tangerine/15 blur-3xl" />
+
+            <div className="relative z-10 grid gap-8 lg:grid-cols-12 lg:items-center">
+            {/* Left: Full-Space Hero Logo & Badges */}
+            <div className="flex flex-col items-start lg:col-span-5 space-y-6">
+              <div className="w-full flex items-center justify-start py-2">
+                <img
+                  src="/opcc-logo.webp"
+                  alt="One Pampanga Culinary Cup (OPCC)"
+                  className="h-46 sm:h-58 md:h-66 w-auto max-w-full object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.6)] transition-transform duration-300 hover:scale-102"
+                />
+              </div>
+
+              {/* Badges positioned neatly below */}
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="border border-chili/40 bg-chili/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-chili">
+                  Official Battle Arena
+                </span>
+                <span className="border border-basil/40 bg-basil/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-basil">
+                  8 Live Categories
+                </span>
+                <span className="border border-marigold/40 bg-marigold/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-marigold">
+                  Mall Public Viewing
+                </span>
+              </div>
             </div>
-            <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-basil">
-              <span className="h-2 w-2 rounded-full bg-basil animate-pulse" />
-              Free Public Spectator Viewing
+
+            {/* Right: Narrative & Venue Spotlight */}
+            <div className="space-y-5 lg:col-span-7 lg:border-l lg:border-white/15 lg:pl-10">
+              <div className="eyebrow text-tangerine">The Inaugural Showdown</div>
+              <h3 className="font-display text-2xl sm:text-3xl font-black text-white leading-tight">
+                &ldquo;Make your mark at the first-ever One Pampanga Culinary Cup.&rdquo;
+              </h3>
+              <p className="text-sm sm:text-base leading-relaxed text-white/75">
+                Central Luzon&apos;s ultimate culinary tournament brings together professional master chefs,
+                hoteliers, and rising student culinary artists in live kitchen arenas.
+                Experience real-time culinary battles, sensory judging, and the ceremonial unveiling of the Giant Ube Kakanin.
+              </p>
+
+              <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-white/12 text-xs">
+                <div>
+                  <div className="font-bold text-white">SM City Clark · The Event Centre</div>
+                  <div className="text-white/50">Ground Level (In front of Food Court)</div>
+                </div>
+                <div className="flex items-center gap-2 font-bold text-basil">
+                  <span className="h-2.5 w-2.5 rounded-full bg-basil animate-pulse" />
+                  Free Public Spectator Admission
+                </div>
+              </div>
             </div>
           </div>
         </div>
