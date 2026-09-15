@@ -56,12 +56,18 @@ export function HeroSection() {
               <span className="text-white">2026</span>
             </h1>
 
-            <p className="mt-8 max-w-xl text-lg leading-relaxed text-white/70">
-              Central Luzon&apos;s premier culinary expo returns — four days of
-              tastings, live competitions, and the region&apos;s top food &amp;
+            {/* Subline */}
+            <div className="mt-4 flex items-center gap-3 font-display text-lg font-bold uppercase tracking-wider text-tangerine sm:text-xl">
+              <span className="h-2 w-2 rounded-full bg-tangerine" />
+              <span>5 Days of Culinary Experience</span>
+            </div>
+
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/70">
+              Central Luzon&apos;s premier culinary expo returns — five days of
+              tastings, live culinary and pastry competitions, and the region&apos;s top food &amp;
               beverage brands under one roof.
             </p>
-
+      
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <Link
                 href="/register-visitor"
@@ -81,8 +87,8 @@ export function HeroSection() {
 
           {/* Right: Fact Stack */}
           <div className="flex flex-col md:col-span-4">
-            <Fact label="Dates" value="16–20" sub="Sept 2026 · 4 Days" accent="text-basil" />
-            <Fact label="Venues" value="SMX + SM" sub="Clark, Pampanga" accent="text-tangerine" border />
+            <Fact label="Dates" value="16 – 20" sub="Sept 2026 · 5 Days" accent="text-basil" />
+            <Fact label="Venues" value="10+ Venues" sub="Across Angeles & Clark" accent="text-tangerine" border />
             <Fact label="Pass Types" value="3" sub="Visitor · Exhibitor · Sponsor" accent="text-marigold" border />
           </div>
         </div>

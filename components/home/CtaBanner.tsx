@@ -4,7 +4,7 @@ export function CtaBanner() {
   return (
     <section className="border-b border-white/12 bg-chili">
       <div className="mx-auto max-w-6xl border-x border-grape-950/20 px-6 py-20 text-center">
-        <div className="eyebrow text-grape-950/60">Four days of culinary excellence</div>
+        <div className="eyebrow text-grape-950/60">Five days of culinary excellence</div>
         <h2 className="mx-auto mt-5 max-w-3xl font-display text-4xl font-black tracking-tight text-grape-950 sm:text-6xl">
           Come hungry. Leave inspired.
         </h2>

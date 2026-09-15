@@ -11,17 +11,17 @@ export function HighlightsSection() {
     },
     {
       no: "02",
-      title: "Giant Ube Kakanin & Culture",
-      desc: "Ceremonial unveiling of the giant Ube Kakanin plus cultural performances by Arti Sta. Rita & CCA Mananayaw.",
-      badge: "Tradition & Craft",
-      accent: "text-basil",
+      title: "OPFBEX Culinary Tour",
+      desc: "An exclusive culinary journey across Angeles City's heritage district and the vibrant Clark Freeport Zone tasting trail.",
+      badge: "Sept 18 · Tour",
+      accent: "text-tangerine",
     },
     {
       no: "03",
-      title: "Food Forward Forum 2026",
-      desc: "High-level industry summit co-presented by Pampanga Business Circle on security, sustainability, and gastro-tourism.",
-      badge: "Sept 19 · SMX",
-      accent: "text-tangerine",
+      title: "Food Forward Forum & BNI Talks",
+      desc: "Back-to-back industry summits on food security, sustainability, and high-impact business growth strategies.",
+      badge: "Sept 19–20 · SMX",
+      accent: "text-basil",
     },
     {
       no: "04",
@@ -47,7 +47,7 @@ export function HighlightsSection() {
   ]
 
   return (
-    <Section id="highlights" index="02" label="The Program" title="Four days, endless flavor">
+    <Section id="highlights" index="02" label="The Program" title="Five days, endless flavor">
       <div className="grid border-t border-l border-white/12 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((c) => (
           <div

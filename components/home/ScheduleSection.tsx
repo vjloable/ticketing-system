@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Section } from "./Section"
 
 export function ScheduleSection() {
-  const [activeDay, setActiveDay] = useState<"all" | "opcc" | "day1" | "day2">("all")
+  const [activeDay, setActiveDay] = useState<"all" | "opcc" | "tour" | "day1" | "day2">("all")
 
   const scheduleData = [
     {
@@ -26,6 +26,27 @@ export function ScheduleSection() {
         { time: "03:30 PM", title: "Celebration Cakes Showpieces & Modern Plated Desserts", highlight: true },
         { time: "05:30 PM", title: "Live Sensory Tasting & Daily Judges' Deliberation", highlight: false },
       ],
+    },
+    {
+      id: "tour",
+      dayTag: "Sept 18",
+      weekday: "Friday",
+      title: "OPFBEX Culinary & Familiarization Tour",
+      venue: "Angeles Heritage District & Clark Freeport Zone",
+      badge: "Culinary Tour",
+      accent: "text-tangerine",
+      border: "border-tangerine",
+      badgeClass: "border-tangerine/40 bg-tangerine/10 text-tangerine",
+      items: [
+        { time: "08:00 AM", title: "Delegates Assembly & Tour Briefing", highlight: false },
+        { time: "10:00 AM", title: "Angeles Heritage Walking Tour: Plaza Angel, Pamintuan Mansion, Holy Rosary Parish & Museu Ning Angeles", highlight: true },
+        { time: "12:00 PM", title: "The Culinarium: Traditional Kapampangan Cooking Demo, Lunch & Kulitan", highlight: true },
+        { time: "02:00 PM", title: "Clark Freeport Zone Welcome & Photo Opportunity at Clark Visitor’s Center", highlight: false },
+        { time: "02:15 PM", title: "Clark Museum Tour & Immersive 4D Theater Experience", highlight: false },
+        { time: "03:00 PM", title: "Clark Rolling Tour: Historic Barn Houses, Centennial Mansions, Sun Valley & Aqua Planet", highlight: false },
+        { time: "03:30 PM", title: "Clark International Airport & Deco Central Design Showroom Visit", highlight: false },
+        { time: "04:30 PM", title: "Official Delegation Drop-off at SMX Convention Center Clark", highlight: false },
+      ]
     },
     {
       id: "day1",
@@ -51,17 +72,18 @@ export function ScheduleSection() {
       id: "day2",
       dayTag: "Sept 20",
       weekday: "Sunday",
-      title: "OPFBEX 2026 Day 2: Showcases & Awards",
+      title: "OPFBEX Day 2: BNI Business Talks & Awards",
       venue: "SMX Convention Center, Clark",
-      badge: "Expo Day 2 + Awards",
+      badge: "Expo Day 2 + Talks",
       accent: "text-tangerine",
       border: "border-tangerine",
       badgeClass: "border-tangerine/40 bg-tangerine/10 text-tangerine",
       items: [
-        { time: "10:00 AM", title: "Expo Doors Open: Artisan Marketplace & Gourmet Hall", highlight: false },
-        { time: "11:30 AM", title: "Pastry Lab Masterclass & Regional Delicacy Showcase", highlight: false },
-        { time: "01:30 PM", title: "Grand Live Cooking Showdown & Chef Battles", highlight: true },
-        { time: "04:30 PM", title: "Official OPFBEX & OPCC 2026 Awards Ceremony", highlight: true },
+        { time: "10:00 AM", title: "Expo Doors Open: Artisan Marketplace, Gourmet Hall & Live Chef Showcases", highlight: false },
+        { time: "01:00 PM", title: "BNI Business Talk 1: 'Your Money has an Expiration Date' — Mr. Paolo Alcera (FWD)", highlight: true },
+        { time: "02:15 PM", title: "BNI Business Talk 2: 'Recipe for Compliance: Environmental Risks' — Engr. Joanna Marie Martinez", highlight: true },
+        { time: "03:30 PM", title: "BNI Business Talk 3: 'From Kitchen to Cash: 7 Hidden Profit Leaks' — Mr. John Arthur Barrera", highlight: true },
+        { time: "04:30 PM", title: "Official OPFBEX & OPCC 2026 Grand Awards Ceremony", highlight: true },
         { time: "06:30 PM", title: "Closing Grand Tasting, Fellowship & Celebration", highlight: false },
         { time: "07:00 PM", title: "OPFBEX 2026 Grand Finale Conclusion", highlight: false },
       ],
@@ -78,10 +100,10 @@ export function ScheduleSection() {
       id="schedule"
       index="06"
       label="Official Program"
-      title="The Official 4-Day Timeline"
+      title="The Official 5-Day Timeline"
       action={
         <span className="eyebrow text-white/50">
-          Sept 16–17 (SM City Clark) · Sept 19–20 (SMX Clark)
+          Sept 16–17 (SM City Clark) · Sept 18 (Culinary Tour) · Sept 19–20 (SMX Clark)
         </span>
       }
     >
@@ -112,6 +134,17 @@ export function ScheduleSection() {
           </button>
           <button
             type="button"
+            onClick={() => setActiveDay("tour")}
+            className={`px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              activeDay === "tour"
+                ? "border border-tangerine bg-tangerine text-grape-950 font-extrabold shadow-sm"
+                : "border border-white/15 bg-white/5 text-white/70 hover:border-white/30 hover:text-white"
+            }`}
+          >
+            Sept 18 (Fri) · Culinary Tour
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveDay("day1")}
             className={`px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
               activeDay === "day1"
@@ -137,7 +170,7 @@ export function ScheduleSection() {
         {/* Schedule Cards Grid */}
         <div
           className={`grid gap-6 ${
-            activeDay === "all" ? "md:grid-cols-3" : "grid-cols-1"
+            activeDay === "all" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-4" : "grid-cols-1"
           }`}
         >
           {displayedDays.map((d) => (
