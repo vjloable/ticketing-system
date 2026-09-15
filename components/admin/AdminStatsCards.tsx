@@ -98,8 +98,16 @@ export function AdminStatsCards({ passes }: StatsCardsProps) {
           <div className="font-display text-3xl font-extrabold text-white">{checkedIn}</div>
           <div className="text-xs font-bold text-basil">{checkInRate}% rate</div>
         </div>
+        
         {/* Progress Bar */}
-        <div className="mt-3 h-1.5 w-full bg-grape-950 overflow-hidden">
+        <div
+          className="mt-3 h-1.5 w-full bg-grape-950 overflow-hidden"
+          role="progressbar"
+          aria-valuenow={checkInRate}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Check-in rate: ${checkInRate}%`}
+        >
           <div
             className="h-full bg-basil transition-all duration-500"
             style={{ width: `${checkInRate}%` }}

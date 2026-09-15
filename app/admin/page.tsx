@@ -293,18 +293,20 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Toast Notification */}
-      {feedback && (
-        <div
-          className={`mt-4 border p-3 text-xs font-semibold ${
-            feedback.type === "success"
-              ? "border-basil/50 bg-basil/10 text-basil"
-              : "border-chili/50 bg-chili/10 text-chili"
-          }`}
-        >
-          {feedback.type === "success" ? "✓" : "⚠️"} {feedback.text}
-        </div>
-      )}
+      {/* Toast Notification — ARIA Live Region */}
+      <div role="status" aria-live="polite" aria-atomic="true" className="mt-4">
+        {feedback && (
+          <div
+            className={`border p-3 text-xs font-semibold ${
+              feedback.type === "success"
+                ? "border-basil/50 bg-basil/10 text-basil"
+                : "border-chili/50 bg-chili/10 text-chili"
+            }`}
+          >
+            {feedback.type === "success" ? "✓" : "⚠️"} {feedback.text}
+          </div>
+        )}
+      </div>
 
       {/* Stats Cards Section */}
       <div className="mt-6">
@@ -316,8 +318,12 @@ export default function AdminDashboardPage() {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           {/* Search Box */}
           <div className="relative flex-1 max-w-md">
+            <label htmlFor="admin-search" className="sr-only">
+              Search attendees by ticket code, name, company, or email
+            </label>
             <input
-              type="text"
+              id="admin-search"
+              type="search"
               placeholder="Search by ticket code, name, company, email..."
               value={searchQuery}
               onChange={(e) => {
@@ -330,6 +336,7 @@ export default function AdminDashboardPage() {
               <button
                 onClick={() => setSearchQuery("")}
                 className="absolute right-3 top-2.5 text-xs text-white/40 hover:text-white"
+                aria-label="Clear search"
               >
                 ✕
               </button>
@@ -355,7 +362,11 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Status Filter Tabs */}
-        <div className="mt-4 flex flex-wrap gap-2 border-t border-white/10 pt-3">
+        <div
+          className="mt-4 flex flex-wrap gap-2 border-t border-white/10 pt-3"
+          role="group"
+          aria-label="Filter by pass status"
+        >
           {(["all", "active", "checked_in", "pending_verification", "cancelled"] as const).map((st) => (
             <button
               key={st}
@@ -363,6 +374,7 @@ export default function AdminDashboardPage() {
                 setSelectedStatus(st)
                 setCurrentPage(1)
               }}
+              aria-pressed={selectedStatus === st}
               className={`px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                 selectedStatus === st
                   ? "border border-marigold bg-marigold text-grape-950"
@@ -385,38 +397,73 @@ export default function AdminDashboardPage() {
           <table className="w-full text-left text-xs text-white/80 border-collapse">
             <thead>
               <tr className="border-b border-white/12 bg-grape-950 text-[10px] uppercase tracking-wider text-white/50">
-                <th className="py-3 px-4">Ticket Code</th>
+                <th className="py-3 px-4" scope="col">Ticket Code</th>
                 <th
-                  className="py-3 px-4 cursor-pointer hover:text-white transition-colors select-none"
-                  onClick={() => toggleSort("name")}
+                  className="py-3 px-4"
+                  scope="col"
+                  aria-sort={sortField === "name" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
                 >
-                  Attendee / Company{sortIndicator("name")}
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("name")}
+                    className="inline-flex items-center gap-1 hover:text-white transition-colors cursor-pointer text-inherit uppercase tracking-wider font-inherit"
+                  >
+                    Attendee / Company{sortIndicator("name")}
+                  </button>
                 </th>
                 <th
-                  className="py-3 px-4 cursor-pointer hover:text-white transition-colors select-none"
-                  onClick={() => toggleSort("passType")}
+                  className="py-3 px-4"
+                  scope="col"
+                  aria-sort={sortField === "passType" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
                 >
-                  Pass Type{sortIndicator("passType")}
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("passType")}
+                    className="inline-flex items-center gap-1 hover:text-white transition-colors cursor-pointer text-inherit uppercase tracking-wider font-inherit"
+                  >
+                    Pass Type{sortIndicator("passType")}
+                  </button>
                 </th>
                 <th
-                  className="py-3 px-4 cursor-pointer hover:text-white transition-colors select-none"
-                  onClick={() => toggleSort("status")}
+                  className="py-3 px-4"
+                  scope="col"
+                  aria-sort={sortField === "status" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
                 >
-                  Status{sortIndicator("status")}
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("status")}
+                    className="inline-flex items-center gap-1 hover:text-white transition-colors cursor-pointer text-inherit uppercase tracking-wider font-inherit"
+                  >
+                    Status{sortIndicator("status")}
+                  </button>
                 </th>
                 <th
-                  className="py-3 px-4 cursor-pointer hover:text-white transition-colors select-none"
-                  onClick={() => toggleSort("claimedAt")}
+                  className="py-3 px-4"
+                  scope="col"
+                  aria-sort={sortField === "claimedAt" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
                 >
-                  Registered{sortIndicator("claimedAt")}
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("claimedAt")}
+                    className="inline-flex items-center gap-1 hover:text-white transition-colors cursor-pointer text-inherit uppercase tracking-wider font-inherit"
+                  >
+                    Registered{sortIndicator("claimedAt")}
+                  </button>
                 </th>
                 <th
-                  className="py-3 px-4 cursor-pointer hover:text-white transition-colors select-none"
-                  onClick={() => toggleSort("checkedInAt")}
+                  className="py-3 px-4"
+                  scope="col"
+                  aria-sort={sortField === "checkedInAt" ? (sortDirection === "asc" ? "ascending" : "descending") : undefined}
                 >
-                  Check-In{sortIndicator("checkedInAt")}
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("checkedInAt")}
+                    className="inline-flex items-center gap-1 hover:text-white transition-colors cursor-pointer text-inherit uppercase tracking-wider font-inherit"
+                  >
+                    Check-In{sortIndicator("checkedInAt")}
+                  </button>
                 </th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="py-3 px-4 text-right" scope="col">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10">
