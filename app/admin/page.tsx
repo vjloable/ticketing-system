@@ -12,9 +12,6 @@ import { AdminPassDetailModal } from "@/components/admin/AdminPassDetailModal"
 type SortField = "name" | "passType" | "status" | "claimedAt" | "checkedInAt"
 type SortDirection = "asc" | "desc"
 
-type SortField = "name" | "passType" | "status" | "claimedAt" | "checkedInAt"
-type SortDirection = "asc" | "desc"
-
 export default function AdminDashboardPage() {
   const { user } = useAuth()
   const [passes, setPasses] = useState<AdminPassRecord[]>([])
@@ -27,8 +24,6 @@ export default function AdminDashboardPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [sortField, setSortField] = useState<SortField>("claimedAt")
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
-  const [sortField, setSortField] = useState<SortField>("claimedAt")
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
   const itemsPerPage = 15
 
   const supabase = createClient()
@@ -37,52 +32,6 @@ export default function AdminDashboardPage() {
     setFeedback({ text, type })
     setTimeout(() => setFeedback(null), 4000)
   }
-
-  // CSV Export — respects current filters
-  const exportToCSV = () => {
-    const headers = [
-      "Ticket Code", "Name", "Company", "Email", "Phone",
-      "Pass Type", "Status", "Registered At", "Checked In At",
-    ]
-    const rows = filteredPasses.map((p) => [
-      p.ticketCode,
-      p.formData?.fullName || p.formData?.contactPerson || p.userProfile?.fullName || "",
-      p.formData?.companyName || p.formData?.organization || "",
-      p.formData?.email || p.userProfile?.email || "",
-      p.formData?.phone || "",
-      p.passType,
-      p.status,
-      new Date(p.claimedAt).toLocaleString("en-US", { timeZone: "Asia/Manila" }),
-      p.checkedInAt
-        ? new Date(p.checkedInAt).toLocaleString("en-US", { timeZone: "Asia/Manila" })
-        : "",
-    ])
-
-    const csvContent = [headers, ...rows]
-      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
-      .join("\n")
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `opfbex-attendees-${new Date().toISOString().split("T")[0]}.csv`
-    link.click()
-    URL.revokeObjectURL(url)
-  }
-
-  // Column Sort Toggle
-  const toggleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection((d) => (d === "asc" ? "desc" : "asc"))
-    } else {
-      setSortField(field)
-      setSortDirection("asc")
-    }
-  }
-
-  const sortIndicator = (field: SortField) =>
-    sortField === field ? (sortDirection === "asc" ? " ↑" : " ↓") : ""
 
   // CSV Export — respects current filters
   const exportToCSV = () => {
@@ -308,38 +257,7 @@ export default function AdminDashboardPage() {
     }
   })
 
-  // Sort Logic
-  const sortedPasses = [...filteredPasses].sort((a, b) => {
-    const dir = sortDirection === "asc" ? 1 : -1
-    switch (sortField) {
-      case "name": {
-        const nameA = (
-          a.formData?.fullName || a.formData?.contactPerson || a.userProfile?.fullName || ""
-        ).toLowerCase()
-        const nameB = (
-          b.formData?.fullName || b.formData?.contactPerson || b.userProfile?.fullName || ""
-        ).toLowerCase()
-        return nameA.localeCompare(nameB) * dir
-      }
-      case "passType":
-        return a.passType.localeCompare(b.passType) * dir
-      case "status":
-        return a.status.localeCompare(b.status) * dir
-      case "claimedAt":
-        return (new Date(a.claimedAt).getTime() - new Date(b.claimedAt).getTime()) * dir
-      case "checkedInAt": {
-        const timeA = a.checkedInAt ? new Date(a.checkedInAt).getTime() : 0
-        const timeB = b.checkedInAt ? new Date(b.checkedInAt).getTime() : 0
-        return (timeA - timeB) * dir
-      }
-      default:
-        return 0
-    }
-  })
-
   // Pagination Logic
-  const totalPages = Math.ceil(sortedPasses.length / itemsPerPage) || 1
-  const paginatedPasses = sortedPasses.slice(
   const totalPages = Math.ceil(sortedPasses.length / itemsPerPage) || 1
   const paginatedPasses = sortedPasses.slice(
     (currentPage - 1) * itemsPerPage,
@@ -480,7 +398,6 @@ export default function AdminDashboardPage() {
       <div className="mt-6 border border-white/12 bg-grape-900 overflow-x-auto">
         {isLoading ? (
           <div className="p-12 text-center text-xs text-white/50">Loading attendees...</div>
-        ) : sortedPasses.length === 0 ? (
         ) : sortedPasses.length === 0 ? (
           <div className="p-12 text-center text-xs text-white/50">No attendee passes found matching filters.</div>
         ) : (
