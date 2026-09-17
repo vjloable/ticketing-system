@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useEffect } from "react"
 import { AdminPassRecord } from "@/lib/pass-types"
 import { PassStatusBadge } from "@/components/passes/PassStatusBadge"
 
@@ -20,12 +21,26 @@ export function AdminPassDetailModal({
   onRevertCheckIn,
 }: AdminPassDetailModalProps) {
   const data = pass.formData || {}
-  const isPending = pass.status === "pending_verification"
+    const isPending = pass.status === "pending_verification"
   const isActive = pass.status === "active"
   const isCheckedIn = pass.status === "checked_in"
 
+  // Close modal on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose()
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onClose])
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-attendee-title"
+    >
       <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/20 bg-grape-900 p-6 sm:p-8 shadow-2xl">
         {/* Header */}
         <div className="flex items-start justify-between border-b border-white/10 pb-4">
@@ -34,7 +49,7 @@ export function AdminPassDetailModal({
               <span className="eyebrow text-marigold">{pass.passType} Pass Record</span>
               <PassStatusBadge status={pass.status} />
             </div>
-            <h2 className="mt-2 font-display text-2xl font-bold text-white">
+            <h2 id="modal-attendee-title" className="mt-2 font-display text-2xl font-bold text-white">
               {data.fullName || data.companyName || data.contactPerson || "Attendee Registration"}
             </h2>
             <p className="font-mono text-sm font-bold text-marigold tracking-widest mt-1">
@@ -43,6 +58,7 @@ export function AdminPassDetailModal({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             className="border border-white/20 bg-white/5 px-2.5 py-1 text-xs text-white hover:bg-white/20 cursor-pointer"
           >
             ✕
