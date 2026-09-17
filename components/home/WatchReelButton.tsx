@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { getAssetUrl } from "@/lib/assets"
 
 interface WatchReelButtonProps {
   videoUrl?: string
@@ -8,8 +9,8 @@ interface WatchReelButtonProps {
 }
 
 export function WatchReelButton({
-  videoUrl = "/opfbex25-highlights.mp4",
-  webmUrl = "/opfbex25-highlights.webm",
+  videoUrl = getAssetUrl("/opfbex25-highlights.mp4"),
+  webmUrl = getAssetUrl("/opfbex25-highlights.webm"),
 }: WatchReelButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
 

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { getAssetUrl } from "@/lib/assets"
 
 interface VideoShowcaseProps {
   /** Video URL or path: e.g. "/opfbex25-highlights.mp4" or YouTube embed */
@@ -18,8 +19,8 @@ interface VideoShowcaseProps {
 }
 
 export function VideoShowcase({
-  videoUrl = "/OPFBEX25%20-%20Highlights.mp4",
-  webmUrl,
+  videoUrl = getAssetUrl("/opfbex25-highlights.mp4"),
+  webmUrl = getAssetUrl("/opfbex25-highlights.webm"),
   eyebrow = "Year 01 Reel",
   title = "Relive the Sizzle & Energy",
   description = "Take a peek inside OPFBEX Year 01 at SMX Clark — two unforgettable days of artisan tastings, culinary showdowns, and the region's vibrant food community.",

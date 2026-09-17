@@ -9,3 +9,7 @@ next-env.d.ts
 !.env.example
 .geminiignore
 .agents
+/public/business_logos
+/public/opfbex25-highlights.mp4
+/public/opfbex25-highlights.webm
+/public/adjustments_1

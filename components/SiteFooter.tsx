@@ -35,14 +35,7 @@ export function SiteFooter() {
             ["Program", "/#highlights"],
             ["Schedule", "/#schedule"],
             ["Venue", "/#venue"],
-          ]}
-        />
-        <FooterCol
-          title="Attend"
-          links={[
-            ["Tickets", "/tickets"],
-            ["Exhibitors", "/#exhibitors"],
-            ["Sponsorship", "/#exhibitors"],
+            ["Feedback & Suggestions", "/feedback"],
           ]}
         />
 

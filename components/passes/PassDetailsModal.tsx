@@ -55,15 +55,27 @@ export function PassDetailsModal({
             <p className="text-xs text-white/60">
               Scan this QR code at the SMX Clark entrance desk for instant on-site check-in.
             </p>
-            <div className="pt-2">
-              <Link
-                href={`/passes/${pass.id}/print`}
-                className="inline-flex items-center gap-1.5 border border-marigold bg-marigold/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-marigold hover:bg-marigold hover:text-grape-950 transition-colors"
-              >
-                <span>🖨️</span> Print Event Badge
-              </Link>
-            </div>
+            <Link
+              href={`/passes/${pass.id}/print`}
+              className="inline-flex items-center gap-1.5 border border-marigold bg-marigold/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-marigold hover:bg-marigold hover:text-grape-950 transition-colors"
+            >
+              <span>🖨️</span> Print Event Badge
+            </Link>
           </div>
+        </div>
+
+        {/* Feedback Notice */}
+        <div className="my-4 border border-white/10 bg-white/5 p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div>
+            <div className="text-xs font-bold text-white">Have thoughts or suggestions?</div>
+            <p className="text-[11px] text-white/55">Help us make your OPFBEX expo experience even better.</p>
+          </div>
+          <Link
+            href="/feedback"
+            className="shrink-0 border border-marigold bg-marigold/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-marigold hover:bg-marigold hover:text-grape-950 transition-colors"
+          >
+            Leave Feedback &rarr;
+          </Link>
         </div>
 
         {/* Ticket Summary */}
