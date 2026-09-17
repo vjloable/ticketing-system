@@ -7,14 +7,11 @@ export function SiteFooter() {
       {/* Big wordmark band */}
       <div className="border-b border-white/12">
         <div className="mx-auto max-w-6xl px-5 py-10">
-          <div className="font-display text-5xl font-black leading-none tracking-tighter sm:text-7xl">
-            <span className="text-chili">O</span>
-            <span className="text-tangerine">P</span>
-            <span className="text-marigold">F</span>
-            <span className="text-marigold">B</span>
-            <span className="text-basil">E</span>
-            <span className="text-lime">X</span>
-            <span className="text-white/25"> 2026</span>
+          <div className="flex items-center gap-3 font-display text-5xl font-black leading-none tracking-tighter sm:text-7xl">
+            {/* h in em so the logo tracks the responsive font size and matches
+                the cap height of the "2026" text beside it. */}
+            <img src="/opfbex-logo.svg" alt="OPFBEX" className="h-[0.72em] w-auto" />
+            <span className="text-white/25">2026</span>
           </div>
         </div>
       </div>

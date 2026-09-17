@@ -46,14 +46,10 @@ export function HeroSection() {
             </div>
 
             <h1 className="mt-8 font-display text-6xl font-black leading-[0.9] tracking-tighter sm:text-7xl md:text-8xl">
-              <span className="text-chili">O</span>
-              <span className="text-tangerine">P</span>
-              <span className="text-marigold">F</span>
-              <span className="text-marigold">B</span>
-              <span className="text-basil">E</span>
-              <span className="text-lime">X</span>
-              <br />
-              <span className="text-white">2026</span>
+              {/* h in em so the logo tracks the responsive font size and matches
+                  the cap height of the "2026" line below it. */}
+              <img src="/opfbex-logo.svg" alt="OPFBEX" className="block h-[0.72em] w-auto" />
+              <span className="mt-2 block text-white">2026</span>
             </h1>
 
             {/* Subline */}
