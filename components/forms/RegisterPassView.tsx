@@ -137,6 +137,15 @@ export function RegisterPassView({ passType }: { passType: PassType }) {
             >
               🖨️ Print Badge
             </Link>
+            {/* Show Express Entry ONLY for Visitors */}
+            {passType === "visitor" && (
+              <Link
+                href={`/passes/${successPass.id}/express`}
+                className="flex-1 border border-emerald-500 bg-emerald-500 py-3 text-center text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-emerald-400 cursor-pointer"
+              >
+                ⚡ Open Express Entry Pass
+              </Link>
+            )}
             {user && (
               <Link
                 href="/passes"
