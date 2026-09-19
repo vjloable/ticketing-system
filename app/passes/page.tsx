@@ -210,6 +210,17 @@ export default function MyPassesPage() {
                         View Details
                       </button>
 
+                      {/* Express Pass Button for Visitors */}
+                      {!isCancelled && pass.passType === "visitor" && (
+                        <Link
+                          href={`/passes/${pass.id}/express`}
+                          className="border border-emerald-500/50 bg-emerald-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-emerald-400 hover:bg-emerald-500 hover:text-grape-950 transition-colors flex items-center gap-1.5 cursor-pointer"
+                          title="Open Express Entry Pass"
+                        >
+                          <span>⚡</span> Express Pass
+                        </Link>
+                      )}
+
                       {!isCancelled && (
                         <Link
                           href={`/passes/${pass.id}/print`}

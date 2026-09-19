@@ -174,6 +174,16 @@ export default function PrintPassPage({
         </Link>
 
         <div className="flex items-center gap-3">
+          {/* Direct Express Entry Link */}
+          {dbPass.passType === "visitor" && (
+            <Link
+              href={`/passes/${dbPass.id}/express`}
+              className="border border-emerald-500 bg-emerald-500 px-4 py-2 text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-emerald-400 transition-colors cursor-pointer flex items-center gap-1.5"
+            >
+              <span>⚡</span> Express Pass
+            </Link>
+          )}
+
           {canEdit && (
             <button
               onClick={() => setIsEditing(true)}
