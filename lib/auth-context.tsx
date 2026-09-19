@@ -173,7 +173,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
     
     // Fallback if RPC fails for any reason
-    const ticketCode = generatedCode || `${EVENT_CONFIG.codePrefix.toUpperCase()}-${passType.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`
+    const ticketCode = generatedCode || `${EVENT_CONFIG.codePrefix.toUpperCase()}-${passType.substring(0, 3).toUpperCase()}-${Math.floor(10000 + Math.random() * 90000)}`
     const initialStatus: PassStatus = passType === "visitor" ? "active" : "pending_verification"
     const { data, error } = await supabase
       .from("passes")

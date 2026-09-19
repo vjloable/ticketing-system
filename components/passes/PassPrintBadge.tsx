@@ -92,8 +92,8 @@ export function PassPrintBadge({ pass, userName }: PassPrintBadgeProps) {
         </div>
       </div>
 
-      {/* CENTER: HIGH RESOLUTION QR CODE */}
-      <div className="my-6 flex justify-center">
+      {/* CENTER: HIGH RESOLUTION QR CODE + TICKET CODE */}
+      <div className="my-6 flex flex-col items-center">
         <PassQRCode value={pass.ticketCode} size={150} />
       </div>
 

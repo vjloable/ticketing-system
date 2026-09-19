@@ -286,7 +286,7 @@ export default function AdminScanPage() {
               <input
                 ref={manualInputRef}
                 type="text"
-                placeholder="e.g. OPFBEX-2026-VIS-0001"
+                placeholder="e.g. OPFBEX-2026-VIS-00001"
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value.toUpperCase())}
                 className="flex-1 border border-white/20 bg-grape-950 px-3 py-2 text-xs font-mono text-white placeholder-white/30 uppercase focus:border-marigold focus:outline-none"

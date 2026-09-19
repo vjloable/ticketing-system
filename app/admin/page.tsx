@@ -102,6 +102,7 @@ export default function AdminDashboardPage() {
           )
         `)
         .order("created_at", { ascending: false })
+        .range(0, 24999)
 
       if (error) {
         console.error("Failed to load passes: ", error)
