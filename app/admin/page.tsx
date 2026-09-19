@@ -285,13 +285,6 @@ export default function AdminDashboardPage() {
             📥 Export CSV
           </button>
           <button
-            onClick={exportToCSV}
-            className="border border-white/20 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-white hover:bg-white/10 cursor-pointer"
-            title="Export filtered list as CSV"
-          >
-            📥 Export CSV
-          </button>
-          <button
             onClick={() => fetchPasses()}
             className="border border-white/20 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-white hover:bg-white/10 cursor-pointer"
             title="Refresh list"
@@ -557,7 +550,6 @@ export default function AdminDashboardPage() {
         <div className="mt-4 flex items-center justify-between text-xs text-white/60">
           <div>
             Showing {(currentPage - 1) * itemsPerPage + 1}–
-            {Math.min(currentPage * itemsPerPage, sortedPasses.length)} of {sortedPasses.length} attendees
             {Math.min(currentPage * itemsPerPage, sortedPasses.length)} of {sortedPasses.length} attendees
           </div>
           <div className="flex gap-2">
