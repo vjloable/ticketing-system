@@ -79,38 +79,50 @@ export default function AdminDashboardPage() {
   const sortIndicator = (field: SortField) =>
     sortField === field ? (sortDirection === "asc" ? " ↑" : " ↓") : ""
 
-  // Fetch all passes with profiles
+  // Fetch all visitor passes using batching to bypass the 1,000 PostgREST limit
   const fetchPasses = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("passes")
-        .select(`
-          id,
-          event_id,
-          user_id,
-          pass_type,
-          ticket_code,
-          status,
-          form_data,
-          created_at,
-          checked_in_at,
-          checked_in_by,
-          profiles:user_id (
-            id,
-            full_name,
-            email
-          )
-        `)
-        .order("created_at", { ascending: false })
-        .range(0, 24999)
+      let allRows: any[] = []
+      let from = 0
+      const batchSize = 1000
 
-      if (error) {
-        console.error("Failed to load passes: ", error)
-        showToast("Error fetching passes from Supabase", "error")
-        return
+      while (true) {
+        const { data, error } = await supabase
+          .from("passes")
+          .select(`
+            id,
+            event_id,
+            user_id,
+            pass_type,
+            ticket_code,
+            status,
+            form_data,
+            created_at,
+            checked_in_at,
+            checked_in_by,
+            profiles:user_id (
+              id,
+              full_name,
+              email
+            )
+          `)
+          .eq("pass_type", "visitor")
+          .order("created_at", { ascending: false })
+          .range(from, from + batchSize - 1)
+
+        if (error) {
+          console.error("Failed to load passes: ", error)
+          showToast("Error fetching passes from Supabase", "error")
+          return
+        }
+
+        if (!data || data.length === 0) break
+        allRows.push(...data)
+        if (data.length < batchSize) break
+        from += batchSize
       }
 
-      const formatted: AdminPassRecord[] = (data || []).map((row: any) => ({
+      const formatted: AdminPassRecord[] = allRows.map((row: any) => ({
         id: row.id,
         eventId: row.event_id,
         userId: row.user_id,
@@ -137,6 +149,7 @@ export default function AdminDashboardPage() {
       setIsLoading(false)
     }
   }, [supabase])
+
 
   // Realtime Postgres Changes Subscription
   useEffect(() => {
@@ -343,23 +356,6 @@ export default function AdminDashboardPage() {
               </button>
             )}
           </div>
-
-          {/* Pass Type Filter */}
-          <div className="flex items-center gap-3">
-            <select
-              value={selectedType}
-              onChange={(e) => {
-                setSelectedType(e.target.value as any)
-                setCurrentPage(1)
-              }}
-              className="border border-white/20 bg-grape-950 px-3 py-2 text-xs text-white focus:border-marigold focus:outline-none cursor-pointer"
-            >
-              <option value="all">All Pass Types</option>
-              <option value="visitor">Visitor Passes</option>
-              <option value="exhibitor">Exhibitor Passes</option>
-              <option value="sponsor">Sponsor Passes</option>
-            </select>
-          </div>
         </div>
 
         {/* Status Filter Tabs */}
@@ -407,12 +403,6 @@ export default function AdminDashboardPage() {
                 </th>
                 <th
                   className="py-3 px-4 cursor-pointer hover:text-white transition-colors select-none"
-                  onClick={() => toggleSort("passType")}
-                >
-                  Pass Type{sortIndicator("passType")}
-                </th>
-                <th
-                  className="py-3 px-4 cursor-pointer hover:text-white transition-colors select-none"
                   onClick={() => toggleSort("status")}
                 >
                   Status{sortIndicator("status")}
@@ -450,21 +440,6 @@ export default function AdminDashboardPage() {
                       {company && <div className="text-[11px] text-white/50">{company}</div>}
                     </td>
 
-                    {/* Pass Type */}
-                    <td className="py-3 px-4 uppercase font-bold text-[10px]">
-                      <span
-                        className={
-                          p.passType === "visitor"
-                            ? "text-marigold"
-                            : p.passType === "exhibitor"
-                            ? "text-basil"
-                            : "text-tangerine"
-                        }
-                      >
-                        {p.passType}
-                      </span>
-                    </td>
-
                     {/* Status */}
                     <td className="py-3 px-4 whitespace-nowrap">
                       <PassStatusBadge status={p.status} />
@@ -489,41 +464,31 @@ export default function AdminDashboardPage() {
                       )}
                     </td>
 
-                    {/* Row Actions */}
-                    <td className="py-3 px-4 text-right whitespace-nowrap space-x-1.5">
-                      {p.status === "pending_verification" && (
-                        <button
-                          onClick={() => handleApproveCommercial(p.id)}
-                          className="border border-basil bg-basil/20 px-2 py-1 text-[10px] font-bold uppercase text-basil hover:bg-basil hover:text-grape-950 transition-colors cursor-pointer"
-                          title="Approve Commercial Pass"
-                        >
-                          Approve
-                        </button>
-                      )}
-
+                    {/* Simplified 1-Click Operations */}
+                    <td className="py-3 px-4 text-right whitespace-nowrap space-x-2">
                       {p.status === "active" && (
                         <button
                           onClick={() => handleManualCheckIn(p.id)}
-                          className="border border-lime bg-lime/20 px-2 py-1 text-[10px] font-bold uppercase text-lime hover:bg-lime hover:text-grape-950 transition-colors cursor-pointer"
+                          className="border border-lime bg-lime/20 px-3 py-1 text-[11px] font-bold uppercase text-lime hover:bg-lime hover:text-grape-950 transition-colors cursor-pointer"
                           title="Manual Check-In"
                         >
-                          Check-In
+                          ✓ Check-In
                         </button>
                       )}
 
                       {p.status === "checked_in" && (
                         <button
                           onClick={() => handleRevertCheckIn(p.id)}
-                          className="border border-marigold/40 bg-marigold/10 px-2 py-1 text-[10px] font-bold uppercase text-marigold hover:bg-marigold hover:text-grape-950 transition-colors cursor-pointer"
+                          className="border border-marigold/40 bg-marigold/10 px-3 py-1 text-[11px] font-bold uppercase text-marigold hover:bg-marigold hover:text-grape-950 transition-colors cursor-pointer"
                           title="Undo / Revert Check-In"
                         >
-                          Undo
+                          Revert
                         </button>
                       )}
 
                       <button
                         onClick={() => setInspectingPass(p)}
-                        className="border border-white/20 bg-white/5 px-2 py-1 text-[10px] font-semibold uppercase text-white hover:bg-white/15 cursor-pointer"
+                        className="border border-white/20 bg-white/5 px-2.5 py-1 text-[11px] font-semibold uppercase text-white hover:bg-white/15 cursor-pointer"
                       >
                         Details
                       </button>
@@ -531,7 +496,7 @@ export default function AdminDashboardPage() {
                       <Link
                         href={`/passes/${p.id}/print`}
                         target="_blank"
-                        className="border border-white/20 bg-white/5 px-2 py-1 text-[10px] font-semibold text-white/70 hover:text-white"
+                        className="border border-white/20 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-white/70 hover:text-white inline-block align-middle"
                         title="Print Badge"
                       >
                         🖨️
