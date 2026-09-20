@@ -71,22 +71,36 @@ export default function ExpressPassPage({
           ticketCode = claimResult.ticket_code
           attendeeName = claimResult.full_name || attendeeName
 
-          // Fetch current status for this pass
+          // Fetch current status and days for this pass
           const { data: passRow } = await supabase
             .from("passes")
-            .select("status, checked_in_at")
+            .select("status, form_data, checked_in_at, checked_in_day2_at")
             .eq("id", targetPassId!)
             .maybeSingle()
 
           if (passRow) {
             currentStatus = passRow.status
-            checkedInAt = passRow.checked_in_at
+            checkedInAt = passRow.checked_in_day2_at || passRow.checked_in_at
+            
+            // Check day eligibility
+            const rawDays: string[] = Array.isArray(passRow.form_data?.daysAttending)
+              ? passRow.form_data.daysAttending
+              : typeof passRow.form_data?.daysAttending === "string"
+              ? [passRow.form_data.daysAttending]
+              : []
+            const isRegisteredDay2 = rawDays.some((d) => /day\s*2/i.test(d))
+
+            if (!isRegisteredDay2) {
+              setError("This pass is only valid for Day 1 (Saturday, Sept 19). Please register a new pass for Day 2.")
+              setIsLoading(false)
+              return
+            }
           }
         } else {
           // 2. Fetch pass by UUID or Ticket Code
           let query = supabase
             .from("passes")
-            .select("id, ticket_code, status, form_data, checked_in_at")
+            .select("id, ticket_code, status, form_data, checked_in_at, checked_in_day2_at")
 
           if (isUuid) {
             query = query.eq("id", decodedParam)
@@ -102,35 +116,43 @@ export default function ExpressPassPage({
             return
           }
 
+          // Check day eligibility
+          const rawDays: string[] = Array.isArray(data.form_data?.daysAttending)
+            ? data.form_data.daysAttending
+            : typeof data.form_data?.daysAttending === "string"
+            ? [data.form_data.daysAttending]
+            : []
+          const isRegisteredDay2 = rawDays.some((d) => /day\s*2/i.test(d))
+
+          if (!isRegisteredDay2) {
+            setError("This pass is only valid for Day 1 (Saturday, Sept 19). Please register a new pass for Day 2.")
+            setIsLoading(false)
+            return
+          }
+
           targetPassId = data.id
           ticketCode = data.ticket_code
           currentStatus = data.status
-          checkedInAt = data.checked_in_at
+          checkedInAt = data.checked_in_day2_at || data.checked_in_at
           attendeeName =
             data.form_data?.fullName ||
             data.form_data?.contactPerson ||
             attendeeName
         }
 
-        // 3. Automatically record Check-In in Supabase if not already checked in
-        if (currentStatus !== "checked_in" && targetPassId) {
-          const nowIso = new Date().toISOString()
-          await supabase.rpc("check_in_express_pass", {
+        // 3. Automatically record Day 2 Check-In in Supabase
+        if (targetPassId) {
+          const { data: rpcRes } = await supabase.rpc("check_in_express_pass", {
             p_pass_id: targetPassId,
+            p_day: 2,
           })
 
+          const nowIso = new Date().toISOString()
           setPassData({
             fullName: attendeeName,
             ticketCode: ticketCode || "—",
             status: "checked_in",
-            checkedInAt: nowIso,
-          })
-        } else {
-          setPassData({
-            fullName: attendeeName,
-            ticketCode: ticketCode || "—",
-            status: "checked_in",
-            checkedInAt: checkedInAt,
+            checkedInAt: rpcRes?.checked_in_at || nowIso,
           })
         }
       } catch (err: any) {

@@ -31,6 +31,7 @@ export function ClaimGoogleFormsPass({ onBack }: ClaimGoogleFormsPassProps) {
     email: string
     organization?: string
     pass_id?: string
+    days_attending?: string
   }>>([])
   const [isSearching, setIsSearching] = useState(false)
 
@@ -42,6 +43,7 @@ export function ClaimGoogleFormsPass({ onBack }: ClaimGoogleFormsPassProps) {
     try {
       const { error: rpcErr } = await supabase.rpc("check_in_express_pass", {
         p_pass_id: claimedPass.passId,
+        p_day: 2,
       })
 
       if (rpcErr) throw rpcErr
@@ -82,7 +84,7 @@ export function ClaimGoogleFormsPass({ onBack }: ClaimGoogleFormsPassProps) {
       setIsSearching(true)
       const { data } = await supabase
         .from("google_forms_registrants")
-        .select("id, full_name, email, organization, pass_id")
+        .select("id, full_name, email, organization, pass_id, days_attending")
         .or(`full_name.ilike.%${query}%,email.ilike.%${query}%`)
         .limit(6)
 
@@ -94,9 +96,18 @@ export function ClaimGoogleFormsPass({ onBack }: ClaimGoogleFormsPassProps) {
   }, [email, supabase])
 
   // One-click: Claim + Auto Check-In
-  const handleSelectRegistrant = async (reg: { full_name: string; email: string }) => {
+  const handleSelectRegistrant = async (reg: { full_name: string; email: string; days_attending?: string }) => {
     setIsLoading(true)
     setError(null)
+
+    // Check Day 2 eligibility
+    const days = reg.days_attending || ""
+    const hasDay2 = /day\s*2/i.test(days)
+    if (days && !hasDay2) {
+      setError(`"${reg.full_name}" is registered for Day 1 only. They must register a new pass for Day 2 entry.`)
+      setIsLoading(false)
+      return
+    }
 
     try {
       // 1. Claim Google Forms Pass
@@ -111,10 +122,11 @@ export function ClaimGoogleFormsPass({ onBack }: ClaimGoogleFormsPassProps) {
         return
       }
 
-      // 2. Automatically record check-in
+      // 2. Automatically record Day 2 check-in
       const targetPassId = data.pass_id
       await supabase.rpc("check_in_express_pass", {
         p_pass_id: targetPassId,
+        p_day: 2,
       })
 
       const formattedTime = new Date().toLocaleTimeString("en-PH", {
@@ -316,9 +328,15 @@ export function ClaimGoogleFormsPass({ onBack }: ClaimGoogleFormsPassProps) {
                     {reg.email} {reg.organization ? `• ${reg.organization}` : ""}
                   </div>
                 </div>
-                <span className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 border border-emerald-500/50 bg-emerald-500/20 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-grape-950 transition-colors">
-                  ⚡ Check In
-                </span>
+                {reg.days_attending && !/day\s*2/i.test(reg.days_attending) ? (
+                  <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 border border-chili/50 bg-chili/20 text-chili">
+                    ✕ Day 1 Only
+                  </span>
+                ) : (
+                  <span className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 border border-emerald-500/50 bg-emerald-500/20 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-grape-950 transition-colors">
+                    ⚡ Check In (D2)
+                  </span>
+                )}
               </button>
             ))}
           </div>
