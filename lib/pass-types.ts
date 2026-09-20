@@ -21,7 +21,11 @@ export interface ClaimedPass {
   status: PassStatus
   formData: Record<string, any>
   checkedInAt?: string
+  checkedInDay1At?: string
+  checkedInDay2At?: string
   checkedInBy?: string
+  checkedInDay1By?: string
+  checkedInDay2By?: string
 }
 
 export interface UserAccount {
@@ -42,7 +46,11 @@ export interface AdminPassRecord {
   formData: Record<string, any>
   claimedAt: string
   checkedInAt?: string
+  checkedInDay1At?: string
+  checkedInDay2At?: string
   checkedInBy?: string
+  checkedInDay1By?: string
+  checkedInDay2By?: string
   userProfile?: {
     id?: string
     fullName?: string
@@ -51,7 +59,7 @@ export interface AdminPassRecord {
 }
 
 export interface CheckInScanResult {
-  status: "success" | "already_checked_in" | "pending_verification" | "cancelled" | "not_found"
+  status: "success" | "already_checked_in" | "pending_verification" | "cancelled" | "not_found" | "day1_only"
   message: string
   pass?: AdminPassRecord
   timestamp?: string

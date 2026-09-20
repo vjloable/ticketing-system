@@ -74,7 +74,7 @@ export function VisitorForm({
     age: initialData?.age || "",
     purposes: initialData?.purposes || [],
     otherPurpose: initialData?.otherPurpose || "",
-    daysAttending: initialData?.daysAttending || [],
+    daysAttending: initialData?.daysAttending || ["Day 2: September 20, 2026 (Sunday)"],
     howDidYouHear: initialData?.howDidYouHear || "",
     privacyConsent: initialData?.privacyConsent || false,
   })
@@ -327,23 +327,53 @@ export function VisitorForm({
 
         <div className="grid gap-3 sm:grid-cols-2">
           {DAY_OPTIONS.map((day) => {
+            const isDay1 = /day\s*1/i.test(day)
             const checked = formData.daysAttending.includes(day)
+            
+            if (isDay1) {
+              return (
+                <div
+                  key={day}
+                  className="flex items-center justify-between border border-white/10 bg-grape-950/40 p-4 text-sm text-white/30 cursor-not-allowed select-none"
+                  title="Day 1 has already concluded"
+                >
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      disabled
+                      checked={false}
+                      className="h-4 w-4 opacity-30 cursor-not-allowed"
+                    />
+                    <span className="line-through">{day}</span>
+                  </div>
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-white/40 border border-white/10 px-2 py-0.5">
+                    Concluded
+                  </span>
+                </div>
+              )
+            }
+
             return (
               <label
                 key={day}
-                className={`flex cursor-pointer items-center gap-3 border p-4 text-sm transition-all ${
+                className={`flex cursor-pointer items-center justify-between border p-4 text-sm transition-all ${
                   checked
-                    ? "border-marigold bg-marigold/10 text-white font-semibold"
+                    ? "border-basil bg-basil/15 text-white font-semibold"
                     : "border-white/10 bg-grape-950/60 text-white/70 hover:border-white/25"
                 }`}
               >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => handleDayToggle(day)}
-                  className="accent-marigold h-4 w-4 cursor-pointer"
-                />
-                <span>{day}</span>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => handleDayToggle(day)}
+                    className="accent-basil h-4 w-4 cursor-pointer"
+                  />
+                  <span>{day}</span>
+                </div>
+                <span className="text-[10px] uppercase tracking-wider font-bold text-basil border border-basil/40 bg-basil/10 px-2 py-0.5">
+                  Today (Active)
+                </span>
               </label>
             )
           })}

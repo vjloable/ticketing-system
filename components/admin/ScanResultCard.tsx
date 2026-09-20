@@ -95,9 +95,25 @@ export function ScanResultCard({
 
             <div className="mt-3 border border-marigold/30 bg-grape-950 p-3 text-xs">
               <p className="text-white/70">{message}</p>
-              {pass?.checkedInAt && (
+              {pass?.checkedInDay1At && (
+                <p className="mt-1 text-white/70 text-[11px]">
+                  Day 1 Check-In:{" "}
+                  <span className="text-white font-mono">
+                    {new Date(pass.checkedInDay1At).toLocaleString("en-US", { timeZone: "Asia/Manila", hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </p>
+              )}
+              {pass?.checkedInDay2At && (
+                <p className="mt-0.5 text-marigold text-[11px] font-semibold">
+                  Day 2 Check-In:{" "}
+                  <span className="font-mono">
+                    {new Date(pass.checkedInDay2At).toLocaleString("en-US", { timeZone: "Asia/Manila", hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </p>
+              )}
+              {!pass?.checkedInDay1At && !pass?.checkedInDay2At && pass?.checkedInAt && (
                 <p className="mt-1 text-marigold font-semibold">
-                  Original Check-In:{" "}
+                  Recorded Check-In:{" "}
                   {new Date(pass.checkedInAt).toLocaleString("en-US", { timeZone: "Asia/Manila" })}
                 </p>
               )}
@@ -152,7 +168,52 @@ export function ScanResultCard({
           </div>
         </div>
       )
+    case "day1_only":
+      return (
+        <div className="border-2 border-chili bg-chili/15 p-5 text-white animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex items-center justify-between border-b border-chili/30 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-chili text-white font-bold text-xs">
+                ✕
+              </span>
+              <span className="font-display font-extrabold uppercase tracking-wider text-chili text-sm">
+                Day 1 Pass Only — Day 2 Pass Required
+              </span>
+            </div>
+            <button onClick={onDismiss} className="text-white/60 hover:text-white text-sm cursor-pointer">
+              ✕
+            </button>
+          </div>
 
+          <div className="mt-3">
+            <h3 className="font-display text-lg font-bold text-white">{attendeeName}</h3>
+            <p className="font-mono text-xs font-semibold text-marigold mt-1">{pass?.ticketCode}</p>
+
+            <div className="mt-3 border border-chili/30 bg-grape-950 p-3 text-xs space-y-2">
+              <p className="text-white/90 font-medium">{message}</p>
+              <p className="text-white/60 text-[11px]">
+                Registered Days:{" "}
+                <span className="text-marigold font-mono">
+                  {Array.isArray(data.daysAttending)
+                    ? data.daysAttending.join(", ")
+                    : data.daysAttending || "Day 1 Only"}
+                </span>
+              </p>
+            </div>
+
+            <div className="mt-4 flex gap-2">
+              <a
+                href="/register-visitor"
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 border border-marigold bg-marigold py-2.5 text-center text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-marigold transition-colors"
+              >
+                Register Day 2 Pass →
+              </a>
+            </div>
+          </div>
+        </div>
+      )
     case "cancelled":
     case "not_found":
     default:

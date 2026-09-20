@@ -105,8 +105,20 @@ export function AdminPassDetailModal({
               <span className="text-white/40">Registered At:</span>{" "}
               {new Date(pass.claimedAt).toLocaleString("en-US", { timeZone: "Asia/Manila" })}
             </div>
-            {pass.checkedInAt && (
+            {pass.checkedInDay1At && (
+              <div className="text-marigold font-semibold">
+                <span className="text-white/40">Checked In (Day 1 - Sept 19):</span>{" "}
+                {new Date(pass.checkedInDay1At).toLocaleString("en-US", { timeZone: "Asia/Manila" })}
+              </div>
+            )}
+            {pass.checkedInDay2At && (
               <div className="text-basil font-semibold">
+                <span className="text-white/40">Checked In (Day 2 - Sept 20):</span>{" "}
+                {new Date(pass.checkedInDay2At).toLocaleString("en-US", { timeZone: "Asia/Manila" })}
+              </div>
+            )}
+            {!pass.checkedInDay1At && !pass.checkedInDay2At && pass.checkedInAt && (
+              <div className="text-white font-semibold">
                 <span className="text-white/40">Checked In At:</span>{" "}
                 {new Date(pass.checkedInAt).toLocaleString("en-US", { timeZone: "Asia/Manila" })}
               </div>

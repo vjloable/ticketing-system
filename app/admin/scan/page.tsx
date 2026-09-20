@@ -17,6 +17,7 @@ export default function AdminScanPage() {
   const [recentScans, setRecentScans] = useState<Array<{ code: string; status: string; name: string; time: string }>>([])
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [stats, setStats] = useState({ valid: 0, duplicate: 0, invalid: 0 })
+  const [activeDay, setActiveDay] = useState<1 | 2>(2)
 
   const supabase = createClient()
   const manualInputRef = useRef<HTMLInputElement>(null)
@@ -43,7 +44,11 @@ export default function AdminScanPage() {
           form_data,
           created_at,
           checked_in_at,
+          checked_in_day1_at,
+          checked_in_day2_at,
           checked_in_by,
+          checked_in_day1_by,
+          checked_in_day2_by,
           profiles:user_id (
             id,
             full_name,
@@ -74,7 +79,11 @@ export default function AdminScanPage() {
         formData: passRow.form_data || {},
         claimedAt: passRow.created_at,
         checkedInAt: passRow.checked_in_at,
+        checkedInDay1At: passRow.checked_in_day1_at,
+        checkedInDay2At: passRow.checked_in_day2_at,
         checkedInBy: passRow.checked_in_by,
+        checkedInDay1By: passRow.checked_in_day1_by,
+        checkedInDay2By: passRow.checked_in_day2_by,
         userProfile: passRow.profiles
           ? {
               id: rowProfile(passRow.profiles).id,
@@ -105,21 +114,7 @@ export default function AdminScanPage() {
         return
       }
 
-      // 3. Handle Already Checked In Pass
-      if (pass.status === "checked_in") {
-        if (soundEnabled) audioFeedback.playWarning()
-        setScanResult({
-          status: "already_checked_in",
-          message: `Attendee has already checked in with this badge code.`,
-          pass,
-        })
-        setStats((prev) => ({ ...prev, duplicate: prev.duplicate + 1 }))
-        addRecent(code, "Duplicate", attendeeName)
-        setIsProcessing(false)
-        return
-      }
-
-      // 4. Handle Pending Commercial Verification
+      // 3. Handle Pending Commercial Verification
       if (pass.status === "pending_verification") {
         if (soundEnabled) audioFeedback.playWarning()
         setScanResult({
@@ -133,16 +128,89 @@ export default function AdminScanPage() {
         return
       }
 
-      // 5. Handle Valid Active Pass -> Check In
+      // 4. DAY RESTRICTION CHECK (Only for visitors; exhibitors & sponsors have full all-day credentials)
+      if (pass.passType === "visitor") {
+        const rawDays: string[] = Array.isArray(pass.formData.daysAttending)
+          ? pass.formData.daysAttending
+          : typeof pass.formData.daysAttending === "string"
+          ? [pass.formData.daysAttending]
+          : []
+
+        const isRegisteredDay1 = rawDays.some((d) => /day\s*1/i.test(d))
+        const isRegisteredDay2 = rawDays.some((d) => /day\s*2/i.test(d))
+
+        if (activeDay === 2 && !isRegisteredDay2) {
+          // Attending on Day 2, but registered ONLY for Day 1
+          if (soundEnabled) audioFeedback.playError()
+          setScanResult({
+            status: "day1_only",
+            message: `This pass was registered for Day 1 only. Attendee must register a new pass for Day 2.`,
+            pass,
+          })
+          setStats((prev) => ({ ...prev, invalid: prev.invalid + 1 }))
+          addRecent(code, "Day 1 Only", attendeeName)
+          setIsProcessing(false)
+          return
+        }
+
+        if (activeDay === 1 && !isRegisteredDay1) {
+          // Attending on Day 1, but registered ONLY for Day 2
+          if (soundEnabled) audioFeedback.playError()
+          setScanResult({
+            status: "day1_only",
+            message: `This pass was registered for Day 2 only. Attendee is not registered for Day 1.`,
+            pass,
+          })
+          setStats((prev) => ({ ...prev, invalid: prev.invalid + 1 }))
+          addRecent(code, "Day 2 Only", attendeeName)
+          setIsProcessing(false)
+          return
+        }
+      }
+
+      // 5. CHECK IF ALREADY CHECKED IN FOR THIS SPECIFIC ACTIVE DAY
+      const alreadyCheckedInThisDay =
+        activeDay === 1 ? !!pass.checkedInDay1At : !!pass.checkedInDay2At
+
+      if (alreadyCheckedInThisDay) {
+        if (soundEnabled) audioFeedback.playWarning()
+        const checkInTimestamp =
+          activeDay === 1 ? pass.checkedInDay1At : pass.checkedInDay2At
+        const formattedCheckIn = checkInTimestamp
+          ? new Date(checkInTimestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+          : ""
+
+        setScanResult({
+          status: "already_checked_in",
+          message: `Attendee already checked in for Day ${activeDay}${formattedCheckIn ? ` at ${formattedCheckIn}` : ""}.`,
+          pass,
+        })
+        setStats((prev) => ({ ...prev, duplicate: prev.duplicate + 1 }))
+        addRecent(code, `Duplicate (D${activeDay})`, attendeeName)
+        setIsProcessing(false)
+        return
+      }
+
+      // 6. RECORD CHECK-IN FOR ACTIVE DAY
       const checkInTime = new Date().toISOString()
+      const updatePayload: Record<string, any> = {
+        status: "checked_in",
+        checked_in_at: checkInTime,
+        checked_in_by: user?.id || null,
+        updated_at: checkInTime,
+      }
+
+      if (activeDay === 1) {
+        updatePayload.checked_in_day1_at = checkInTime
+        updatePayload.checked_in_day1_by = user?.id || null
+      } else {
+        updatePayload.checked_in_day2_at = checkInTime
+        updatePayload.checked_in_day2_by = user?.id || null
+      }
+
       const { error: updateErr } = await supabase
         .from("passes")
-        .update({
-          status: "checked_in",
-          checked_in_at: checkInTime,
-          checked_in_by: user?.id || null,
-          updated_at: checkInTime,
-        })
+        .update(updatePayload)
         .eq("id", pass.id)
 
       if (updateErr) {
@@ -158,12 +226,21 @@ export default function AdminScanPage() {
       if (soundEnabled) audioFeedback.playSuccess()
       setScanResult({
         status: "success",
-        message: "Check-In Verified!",
-        pass: { ...pass, status: "checked_in", checkedInAt: checkInTime },
+        message:
+          activeDay === 2 && pass.checkedInDay1At
+            ? "Day 2 Check-In Verified! (Attended Day 1)"
+            : `Check-In Verified for Day ${activeDay}!`,
+        pass: {
+          ...pass,
+          status: "checked_in",
+          checkedInAt: checkInTime,
+          checkedInDay1At: activeDay === 1 ? checkInTime : pass.checkedInDay1At,
+          checkedInDay2At: activeDay === 2 ? checkInTime : pass.checkedInDay2At,
+        },
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       })
       setStats((prev) => ({ ...prev, valid: prev.valid + 1 }))
-      addRecent(code, "Success", attendeeName)
+      addRecent(code, `Success (D${activeDay})`, attendeeName)
     } catch (err) {
       console.error("Scan processing error: ", err)
     } finally {
@@ -201,14 +278,33 @@ export default function AdminScanPage() {
 
   const handleUndoCheckIn = async (passId: string) => {
     setIsProcessing(true)
+    const pass = scanResult?.pass
+    const updatePayload: Record<string, any> = {
+      updated_at: new Date().toISOString(),
+    }
+
+    if (activeDay === 1) {
+      updatePayload.checked_in_day1_at = null
+      updatePayload.checked_in_day1_by = null
+      if (!pass?.checkedInDay2At) {
+        updatePayload.status = "active"
+        updatePayload.checked_in_at = null
+      }
+    } else {
+      updatePayload.checked_in_day2_at = null
+      updatePayload.checked_in_day2_by = null
+      if (!pass?.checkedInDay1At) {
+        updatePayload.status = "active"
+        updatePayload.checked_in_at = null
+      } else {
+        // Fall back latest check-in to Day 1
+        updatePayload.checked_in_at = pass.checkedInDay1At
+      }
+    }
+
     const { error } = await supabase
       .from("passes")
-      .update({
-        status: "active",
-        checked_in_at: null,
-        checked_in_by: null,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq("id", passId)
 
     setIsProcessing(false)
@@ -231,7 +327,31 @@ export default function AdminScanPage() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Day 1 / Day 2 Mode Selector */}
+          <div className="inline-flex rounded-sm p-0.5 bg-grape-950 border border-white/15">
+            <button
+              onClick={() => setActiveDay(1)}
+              className={`px-3 py-1 text-xs font-bold rounded-sm transition-colors cursor-pointer ${
+                activeDay === 1
+                  ? "bg-marigold text-grape-950 shadow-sm"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              Day 1 (Sept 19)
+            </button>
+            <button
+              onClick={() => setActiveDay(2)}
+              className={`px-3 py-1 text-xs font-bold rounded-sm transition-colors cursor-pointer ${
+                activeDay === 2
+                  ? "bg-basil text-grape-950 shadow-sm"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              Day 2 (Sept 20)
+            </button>
+          </div>
+
           <button
             onClick={() => setSoundEnabled((v) => !v)}
             className={`border px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${

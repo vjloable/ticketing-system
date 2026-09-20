@@ -17,8 +17,9 @@ export default function AdminDashboardPage() {
   const [passes, setPasses] = useState<AdminPassRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState<PassStatus | "all">("all")
-  const [selectedType, setSelectedType] = useState<PassType | "all">("all")
+  type FilterStatus = PassStatus | "all" | "day1_checked_in" | "day2_checked_in" | "both_days"
+  const [selectedStatus, setSelectedStatus] = useState<FilterStatus>("all")
+  const [selectedType, _setSelectedType] = useState<PassType | "all">("all")
   const [inspectingPass, setInspectingPass] = useState<AdminPassRecord | null>(null)
   const [feedback, setFeedback] = useState<{ text: string; type: "success" | "error" } | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
@@ -37,7 +38,8 @@ export default function AdminDashboardPage() {
   const exportToCSV = () => {
     const headers = [
       "Ticket Code", "Name", "Company", "Email", "Phone",
-      "Pass Type", "Status", "Registered At", "Checked In At",
+      "Pass Type", "Status", "Registered Days", "Registered At",
+      "Checked In Day 1", "Checked In Day 2", "Latest Check In",
     ]
     const rows = filteredPasses.map((p) => [
       p.ticketCode,
@@ -47,7 +49,14 @@ export default function AdminDashboardPage() {
       p.formData?.phone || "",
       p.passType,
       p.status,
+      Array.isArray(p.formData?.daysAttending) ? p.formData.daysAttending.join("; ") : p.formData?.daysAttending || "",
       new Date(p.claimedAt).toLocaleString("en-US", { timeZone: "Asia/Manila" }),
+      p.checkedInDay1At
+        ? new Date(p.checkedInDay1At).toLocaleString("en-US", { timeZone: "Asia/Manila" })
+        : "",
+      p.checkedInDay2At
+        ? new Date(p.checkedInDay2At).toLocaleString("en-US", { timeZone: "Asia/Manila" })
+        : "",
       p.checkedInAt
         ? new Date(p.checkedInAt).toLocaleString("en-US", { timeZone: "Asia/Manila" })
         : "",
@@ -99,7 +108,11 @@ export default function AdminDashboardPage() {
             form_data,
             created_at,
             checked_in_at,
+            checked_in_day1_at,
+            checked_in_day2_at,
             checked_in_by,
+            checked_in_day1_by,
+            checked_in_day2_by,
             profiles:user_id (
               id,
               full_name,
@@ -132,7 +145,11 @@ export default function AdminDashboardPage() {
         formData: row.form_data || {},
         claimedAt: row.created_at,
         checkedInAt: row.checked_in_at,
+        checkedInDay1At: row.checked_in_day1_at,
+        checkedInDay2At: row.checked_in_day2_at,
         checkedInBy: row.checked_in_by,
+        checkedInDay1By: row.checked_in_day1_by,
+        checkedInDay2By: row.checked_in_day2_by,
         userProfile: row.profiles
           ? {
               id: row.profiles.id,
@@ -187,13 +204,16 @@ export default function AdminDashboardPage() {
 
   // Manual Check-In Handler
   const handleManualCheckIn = async (passId: string) => {
+    const nowIso = new Date().toISOString()
     const { error } = await supabase
       .from("passes")
       .update({
         status: "checked_in",
-        checked_in_at: new Date().toISOString(),
+        checked_in_day2_at: nowIso,
+        checked_in_day2_by: user?.id || null,
+        checked_in_at: nowIso,
         checked_in_by: user?.id || null,
-        updated_at: new Date().toISOString(),
+        updated_at: nowIso,
       })
       .eq("id", passId)
 
@@ -236,7 +256,18 @@ export default function AdminDashboardPage() {
       (p.formData?.email && String(p.formData.email).toLowerCase().includes(q)) ||
       (p.userProfile?.email && p.userProfile.email.toLowerCase().includes(q))
 
-    const matchesStatus = selectedStatus === "all" || p.status === selectedStatus
+    let matchesStatus = true
+    if (selectedStatus === "all") {
+      matchesStatus = true
+    } else if (selectedStatus === "day1_checked_in") {
+      matchesStatus = !!p.checkedInDay1At
+    } else if (selectedStatus === "day2_checked_in") {
+      matchesStatus = !!p.checkedInDay2At
+    } else if (selectedStatus === "both_days") {
+      matchesStatus = !!p.checkedInDay1At && !!p.checkedInDay2At
+    } else {
+      matchesStatus = p.status === selectedStatus
+    }
     const matchesType = selectedType === "all" || p.passType === selectedType
 
     return matchesQuery && matchesStatus && matchesType
@@ -358,27 +389,44 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Status Filter Tabs */}
+        {/* Status Filter Tabs with Multi-Day Support */}
         <div
-          className="mt-4 flex flex-wrap gap-2 border-t border-white/10 pt-3"
+          className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/10 pt-3"
           role="group"
           aria-label="Filter by pass status"
         >
-          {(["all", "active", "checked_in", "pending_verification", "cancelled"] as const).map((st) => (
+          <span className="text-[10px] uppercase font-bold text-white/40 mr-1">Filter:</span>
+          {(
+            [
+              { id: "all", label: "All", count: passes.length },
+              { id: "day2_checked_in", label: "Day 2 Checked In", count: passes.filter((p) => !!p.checkedInDay2At).length },
+              { id: "day1_checked_in", label: "Day 1 Checked In", count: passes.filter((p) => !!p.checkedInDay1At).length },
+              { id: "both_days", label: "Both Days", count: passes.filter((p) => !!p.checkedInDay1At && !!p.checkedInDay2At).length },
+              { id: "active", label: "Not Checked In", count: passes.filter((p) => p.status === "active").length },
+              { id: "pending_verification", label: "Pending", count: passes.filter((p) => p.status === "pending_verification").length },
+              { id: "cancelled", label: "Cancelled", count: passes.filter((p) => p.status === "cancelled").length },
+            ] as const
+          ).map((tab) => (
             <button
-              key={st}
+              key={tab.id}
               onClick={() => {
-                setSelectedStatus(st)
+                setSelectedStatus(tab.id)
                 setCurrentPage(1)
               }}
-              aria-pressed={selectedStatus === st}
+              aria-pressed={selectedStatus === tab.id}
               className={`px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-                selectedStatus === st
-                  ? "border border-marigold bg-marigold text-grape-950"
+                selectedStatus === tab.id
+                  ? tab.id === "day2_checked_in"
+                    ? "border border-basil bg-basil text-grape-950"
+                    : tab.id === "day1_checked_in"
+                    ? "border border-marigold bg-marigold text-grape-950"
+                    : tab.id === "both_days"
+                    ? "border border-lime bg-lime text-grape-950"
+                    : "border border-white bg-white text-grape-950"
                   : "border border-white/15 bg-grape-950 text-white/60 hover:text-white"
               }`}
             >
-              {st.replace("_", " ")} ({passes.filter((p) => (st === "all" ? true : p.status === st)).length})
+              {tab.label} ({tab.count})
             </button>
           ))}
         </div>
@@ -453,15 +501,28 @@ export default function AdminDashboardPage() {
                       })}
                     </td>
 
-                    {/* Check In Date */}
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      {p.checkedInAt ? (
-                        <span className="text-lime text-[11px] font-semibold">
-                          ✓ {new Date(p.checkedInAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        </span>
-                      ) : (
-                        <span className="text-white/30">—</span>
-                      )}
+                    {/* Check In Dates for Day 1 & Day 2 */}
+                    <td className="py-3 px-4 whitespace-nowrap space-y-0.5">
+                      <div className="flex items-center gap-1.5 text-[10px]">
+                        <span className="text-white/40 uppercase">D1:</span>
+                        {p.checkedInDay1At ? (
+                          <span className="text-marigold font-mono font-semibold">
+                            ✓ {new Date(p.checkedInDay1At).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        ) : (
+                          <span className="text-white/20">—</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[10px]">
+                        <span className="text-white/40 uppercase">D2:</span>
+                        {p.checkedInDay2At ? (
+                          <span className="text-basil font-mono font-semibold">
+                            ✓ {new Date(p.checkedInDay2At).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        ) : (
+                          <span className="text-white/20">—</span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Simplified 1-Click Operations */}
