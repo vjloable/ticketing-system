@@ -9,10 +9,10 @@ export const EVENT_CONFIG = {
 
   // Deadlines & Policies
   deadlines: {
-    visitorCutoff: new Date("2026-09-20T18:00:00+08:00"),
+    visitorCutoff: new Date("2026-09-20T22:00:00+08:00"),
     commercialCutoff: new Date("2026-09-12T23:59:59+08:00"),
     editCutoff: new Date("2026-09-12T23:59:59+08:00"),
-    visitorCutoffFormatted: "September 20, 2026 (6:00 PM PHT)",
+    visitorCutoffFormatted: "September 20, 2026 (10:00 PM PHT)",
     commercialCutoffFormatted: "September 12, 2026 (11:59 PM PHT)",
   },
 

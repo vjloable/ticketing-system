@@ -181,7 +181,7 @@ export const SPONSORSHIP_TIERS = [
 // Cutoff Dates
 // Commercial (Exhibitor / Sponsor): September 12, 2026 (7 days before event)
 export const COMMERCIAL_REGISTRATION_CUTOFF = EVENT_CONFIG.deadlines.commercialCutoff
-// Visitor (Walk-in / Same Day): Open through expo closing on September 20, 2026 at 6:00 PM PHT
+// Visitor (Walk-in / Same Day): Open through expo closing on September 20, 2026 at 10:00 PM PHT
 export const VISITOR_REGISTRATION_CUTOFF = EVENT_CONFIG.deadlines.visitorCutoff
 // Pass Edit Cutoff: September 12, 2026 (11:59 PM PHT)
 export const EDIT_CUTOFF_DATE = EVENT_CONFIG.deadlines.editCutoff
