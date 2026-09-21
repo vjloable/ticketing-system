@@ -1,6 +1,6 @@
 import { HeroSection } from "@/components/home/HeroSection"
 import { SponsorMarquee } from "@/components/home/SponsorMarquee"
-import { PartnerPassesSection } from "@/components/home/PartnerPassesSection"
+// import { PartnerPassesSection } from "@/components/home/PartnerPassesSection"
 import { MarqueeBar } from "@/components/home/MarqueeBar"
 import { AboutSection } from "@/components/home/AboutSection"
 import { HighlightsSection } from "@/components/home/HighlightsSection"
@@ -16,7 +16,7 @@ export default function Home() {
     <>
       <HeroSection />
       <SponsorMarquee />
-      <PartnerPassesSection />
+      {/* <PartnerPassesSection /> */}
       <MarqueeBar />
       <AboutSection />
       <HighlightsSection />

@@ -4,8 +4,8 @@ export const EVENT_CONFIG = {
   name: "One Pampanga Food & Beverage Expo 2026",
   shortName: "OPFBEX 2026",
   codePrefix: "OPFBEX-2026",
-  dates: "September 19–20, 2026",
-  venue: "SMX Convention Center Clark",
+  dates: "September 16–20, 2026",
+  venue: "SM City Clark, Angeles Heritage Trail & SMX Clark",
 
   // Deadlines & Policies
   deadlines: {
@@ -18,8 +18,8 @@ export const EVENT_CONFIG = {
 
   // Contact
   support: {
-    email: "opfbexofficial@gmail.com",
-    phone: "+63 917 521 1106",
+    email: "opfbex2026.tickets@gmail.com",
+    phone: "+63 916 659 5434",
   },
 
   // Commercial Payment
