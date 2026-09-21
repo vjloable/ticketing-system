@@ -66,16 +66,16 @@ export function HeroSection() {
       
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <Link
-                href="/register-visitor"
+                href="/feedback"
                 className="border border-marigold bg-marigold px-8 py-3.5 text-sm font-bold uppercase tracking-wider text-grape-950 transition-all hover:bg-transparent hover:text-marigold"
               >
-                Register as Visitor →
+                Share Your Feedback ★ →
               </Link>
               <Link
-                href="#partner-passes"
+                href="#highlights"
                 className="border border-white/25 px-6 py-3.5 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:border-white hover:bg-white/5"
               >
-                Exhibitor &amp; Sponsor Passes
+                Explore Event Highlights
               </Link>
               <WatchReelButton />
             </div>

@@ -95,10 +95,10 @@ export default function MyPassesPage() {
             </p>
           </div>
           <Link
-            href="/register-visitor"
+            href="/feedback"
             className="border border-marigold bg-marigold px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-marigold cursor-pointer"
           >
-            + Claim Another Pass
+            Share Event Feedback ★
           </Link>
         </div>
 

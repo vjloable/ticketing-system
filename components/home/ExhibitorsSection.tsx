@@ -73,10 +73,10 @@ export function ExhibitorsSection() {
             Over <strong className="text-white">80+ food &amp; beverage enterprises</strong> exhibiting live this September.
           </span>
           <Link
-            href="/register-visitor"
+            href="/feedback"
             className="text-xs font-bold text-marigold uppercase tracking-wider hover:underline"
           >
-            Get Visitor Pass to Meet Them →
+            Share Exhibitor &amp; Brand Feedback →
           </Link>
         </div>
       </div>

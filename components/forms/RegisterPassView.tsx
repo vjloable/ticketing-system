@@ -90,12 +90,18 @@ export function RegisterPassView({ passType }: { passType: PassType }) {
             <p><span className="text-white/40">Email:</span> {POLICY_RULES.supportEmail}</p>
             <p><span className="text-white/40">Hotline:</span> {POLICY_RULES.supportPhone}</p>
           </div>
-          <div className="mt-8 flex justify-center gap-3">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
               href="/"
               className="border border-white/20 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:border-white cursor-pointer"
             >
               Return to Home
+            </Link>
+            <Link
+              href="/feedback"
+              className="border border-marigold bg-marigold px-6 py-3 text-xs font-bold uppercase tracking-wider text-grape-950 hover:bg-transparent hover:text-marigold cursor-pointer"
+            >
+              Give Event Feedback ★
             </Link>
           </div>
         </div>

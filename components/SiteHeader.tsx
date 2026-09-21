@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth-context"
 
 const nav = [
   { label: "About", href: "/#about" },
-  { label: "Partner", href: "/#partner-passes" },
+  { label: "Feedback", href: "/#feedback" },
   { label: "Program", href: "/#highlights" },
   { label: "Exhibitors", href: "/#exhibitors" },
   { label: "Schedule", href: "/#schedule" },
@@ -39,10 +39,10 @@ export function SiteHeader() {
         {/* Top-Right Actions */}
         <div className="flex items-center gap-3">
           <Link
-            href="/register-visitor"
+            href="/feedback"
             className="hidden border border-marigold bg-marigold px-4 py-2 text-xs font-bold uppercase tracking-wider text-grape-950 transition-colors hover:bg-transparent hover:text-marigold sm:inline-block"
           >
-            Visitor Pass
+            Give Feedback ★
           </Link>
 
           {user ? (
@@ -129,11 +129,11 @@ export function SiteHeader() {
 
             <div className="flex flex-col gap-2 pt-4 pb-2">
               <Link
-                href="/register-visitor"
+                href="/feedback"
                 onClick={() => setOpen(false)}
                 className="border border-marigold bg-marigold py-2.5 text-center text-xs font-bold uppercase tracking-wider text-grape-950"
               >
-                Get Visitor Pass
+                Give Event Feedback ★
               </Link>
 
               {user ? (

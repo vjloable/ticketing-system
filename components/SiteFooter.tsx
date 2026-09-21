@@ -20,8 +20,7 @@ export function SiteFooter() {
         <div>
           <Logo />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/55">
-            Central Luzon&apos;s premier culinary expo. Two days of chefs,
-            producers, and food lovers under one roof.
+            Five days of chefs, producers, and food lovers across Clark & Angeles City.
           </p>
         </div>
 
@@ -39,8 +38,8 @@ export function SiteFooter() {
         <div>
           <h4 className="eyebrow text-white/45">Contact</h4>
           <ul className="mt-5 space-y-2 text-sm">
-            <li className="text-basil">opfbexofficial@gmail.com</li>
-            <li className="text-basil">+63 917 521 1106</li>
+            <li className="text-basil">opfbex2026.tickets@gmail.com</li>
+            <li className="text-basil">+63 916 659 5434</li>
             <li className="text-white/55">SMX Convention Center, Clark</li>
           </ul>
         </div>
@@ -49,7 +48,7 @@ export function SiteFooter() {
       <div className="border-t border-white/12">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 py-5 text-xs text-white/40 sm:flex-row">
           <p>© 2026 OPFBEX. All rights reserved.</p>
-          <p className="eyebrow">Sept 19–20 · SMX Clark</p>
+          <p className="eyebrow">Sept 16–20 · Clark & Angeles City</p>
         </div>
       </div>
     </footer>
