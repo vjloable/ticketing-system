@@ -280,6 +280,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const cancelPass = async (passId: string): Promise<boolean> => {
     if (!user) return false
 
+    // Post-event lock: do not allow passes to be cancelled after event cutoff
+    if (new Date() > new Date("2026-09-20T22:00:00+08:00")) {
+      console.warn("Pass cancellation locked: event has concluded.")
+      return false
+    }
+
     const { error } = await supabase
       .from("passes")
       .update({

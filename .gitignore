@@ -16,3 +16,5 @@ next-env.d.ts
 /public/opfbex25-highlights-compressed.webm
 /public/adjustments_1
 /scripts/sent-feedback-log.json
+/scripts/sent-log.json
+/archive

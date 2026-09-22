@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
+import Link from "next/link"
 
 export default function ExpressPassPage({
   params,
@@ -140,19 +141,26 @@ export default function ExpressPassPage({
             attendeeName
         }
 
-        // 3. Automatically record Day 2 Check-In in Supabase
-        if (targetPassId) {
-          const { data: rpcRes } = await supabase.rpc("check_in_express_pass", {
-            p_pass_id: targetPassId,
-            p_day: 2,
-          })
+        // 3. Only record check-in if the event was actively live (cutoff: Sept 20, 10:00 PM)
+        const isEventConcluded = new Date() > new Date("2026-09-20T22:00:00+08:00")
 
-          const nowIso = new Date().toISOString()
+        if (targetPassId) {
+          let checkInTimestamp = checkedInAt
+
+          // Only trigger auto-checkin if the event is NOT concluded and they aren't checked in yet
+          if (!isEventConcluded && currentStatus !== "checked_in") {
+            const { data: rpcRes } = await supabase.rpc("check_in_express_pass", {
+              p_pass_id: targetPassId,
+              p_day: 2,
+            })
+            checkInTimestamp = rpcRes?.checked_in_at || new Date().toISOString()
+          }
+
           setPassData({
             fullName: attendeeName,
             ticketCode: ticketCode || "—",
-            status: "checked_in",
-            checkedInAt: rpcRes?.checked_in_at || nowIso,
+            status: currentStatus,
+            checkedInAt: checkInTimestamp,
           })
         }
       } catch (err: any) {
@@ -242,6 +250,16 @@ export default function ExpressPassPage({
           👉 Show this screen to registration staff for fast-track entry.
         </p>
       </div>
+
+      {/* Post-Event Feedback Link */}
+      <div className="mt-4 text-center">
+        <Link
+          href="/feedback"
+          className="inline-block border border-marigold bg-marigold px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-grape-950"
+        >
+          Leave Event Feedback ★
+        </Link>
+      </div>      
     </main>
   )
 }

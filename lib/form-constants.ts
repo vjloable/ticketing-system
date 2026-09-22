@@ -232,6 +232,14 @@ export function canEditPass(pass: ClaimedPass): { allowed: boolean; reason?: str
 
 // Policy: Can this pass be self-cancelled by the member?
 export function canCancelPass(pass: ClaimedPass): { allowed: boolean; reason?: string } {
+  // Event Concluded: Prevent post-event cancellations
+  if (new Date() > new Date("2026-09-20T22:00:00+08:00")) {
+    return {
+      allowed: false,
+      reason: "The event has concluded. Historical registration passes are now archived and cannot be cancelled.",
+    }
+  }
+
   if (pass.status === "cancelled") return { allowed: false, reason: "Pass is already cancelled." }
   if (pass.status === "checked_in") return { allowed: false, reason: "Checked-in passes cannot be cancelled." }
 

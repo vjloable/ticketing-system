@@ -153,25 +153,35 @@ async function run() {
   }
 
   // 2. LIVE BATCH DISPATCH
-  console.log("\n📦 Fetching attendees from database...");
+  console.log("\n📦 Fetching attendees from database (paginated)...");
 
-  // A. Fetch from google_forms_registrants
-  const { data: gforms, error: gError } = await supabase
-    .from("google_forms_registrants")
-    .select("full_name, email");
+  // Helper to paginate through Supabase to bypass the 1,000-row limit
+  async function fetchAllRows(table, selectColumns) {
+    let allRows = [];
+    let from = 0;
+    const batchSize = 1000;
 
-  if (gError) {
-    console.error("Error fetching Google Forms registrants:", gError);
+    while (true) {
+      const { data, error } = await supabase
+        .from(table)
+        .select(selectColumns)
+        .range(from, from + batchSize - 1);
+
+      if (error) {
+        console.error(`Error fetching ${table}:`, error);
+        break;
+      }
+      if (!data || data.length === 0) break;
+      allRows.push(...data);
+      if (data.length < batchSize) break;
+      from += batchSize;
+    }
+    return allRows;
   }
 
-  // B. Fetch from passes table
-  const { data: passes, error: pError } = await supabase
-    .from("passes")
-    .select("form_data");
-
-  if (pError) {
-    console.error("Error fetching passes table:", pError);
-  }
+  // Fetch all rows from both tables without the 1,000 cutoff
+  const gforms = await fetchAllRows("google_forms_registrants", "full_name, email");
+  const passes = await fetchAllRows("passes", "form_data");
 
   // Consolidate & deduplicate by email
   const attendeesMap = new Map();
