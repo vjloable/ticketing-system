@@ -191,7 +191,21 @@ export default function AdminScanPage() {
         return
       }
 
-      // 6. RECORD CHECK-IN FOR ACTIVE DAY
+      // 6. EVENT CONCLUDED GUARD: Lock scanner into Read-Only Audit Mode
+      const isEventConcluded = new Date() > new Date("2026-09-20T22:00:00+08:00")
+      if (isEventConcluded) {
+        if (soundEnabled) audioFeedback.playWarning()
+        setScanResult({
+          status: "success",
+          message: "Event Concluded — Pass loaded in Read-Only Audit Mode. No new check-in was recorded.",
+          pass,
+        })
+        addRecent(code, "Audit Lookup", attendeeName)
+        setIsProcessing(false)
+        return
+      }
+
+      // 7. RECORD CHECK-IN FOR ACTIVE DAY (Only when event was live)
       const checkInTime = new Date().toISOString()
       const updatePayload: Record<string, any> = {
         status: "checked_in",
@@ -381,6 +395,17 @@ export default function AdminScanPage() {
           <span className="text-basil font-bold">✓ {stats.valid} Valid</span>
           <span className="text-marigold font-bold">⚠️ {stats.duplicate} Duplicates</span>
           <span className="text-chili font-bold">✕ {stats.invalid} Invalid</span>
+        </div>
+      </div>
+
+      {/* Post-Event Audit Banner */}
+      <div className="mb-4 flex items-center justify-between border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-xs text-amber-300">
+        <div className="flex items-center gap-2 font-medium">
+          <span className="font-bold uppercase tracking-wider">🔒 Read-Only Audit Mode</span>
+          <span className="text-white/30">•</span>
+          <span className="text-white/70">
+            Event concluded on Sept 20, 10:00 PM. Scanning is active for attendee verification only — database check-ins are locked.
+          </span>
         </div>
       </div>
 
