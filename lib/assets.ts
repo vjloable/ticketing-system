@@ -14,6 +14,8 @@ export function getAssetUrl(path: string): string {
     customStorageUrl ||
     (supabaseUrl ? `${supabaseUrl}/storage/v1/object/public/assets` : "")
 
-  const cleanPath = path.startsWith("/") ? path : `/${path}`
+  let cleanPath = path.startsWith("/") ? path : `/${path}`
+  cleanPath = cleanPath.replace("/business_logos/", "/business-logos/")
+
   return baseUrl ? `${baseUrl}${cleanPath}` : cleanPath
 }

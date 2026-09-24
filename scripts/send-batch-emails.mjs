@@ -1,13 +1,15 @@
 import nodemailer from "nodemailer";
 import fs from "fs";
 import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
 
-// 1. Configuration
-const SUPABASE_URL = "https://epgezqrigtwjngppxpyh.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_sqkEMD9OoD97ZES8c_pRsw_jNQl2PA-";
+dotenv.config({ path: ".env.local" });
 
-const GMAIL_USER = "opfbex2026.tickets@gmail.com";
-const GMAIL_APP_PASS = "obey odom rfud wrgw"; // Your App Password
+// 1. Configuration from .env.local
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const GMAIL_USER = process.env.GMAIL_USER;
+const GMAIL_APP_PASS = process.env.GMAIL_APP_PASSWORD;
 
 // Set TEST_MODE to true to send ONLY 1 test email to yourself first.
 // When you're happy with it, change TEST_MODE to false to send to all attendees!
